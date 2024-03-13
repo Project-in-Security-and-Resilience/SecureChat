@@ -30,12 +30,19 @@ const Chats = () => {
 
   return (
     <div className="chats">
-      {Object.entries(chats)?.sort((a,b)=>b[1].date - a[1].date).map((chat) => (
-        <div
-          className="userChat"
-          key={chat[0]}
-          onClick={() => handleSelect(chat[1].userInfo)}
-        >
+      <div className="userChat">
+        <img src="https://th.bing.com/th/id/OIP.bScrk0MBC5ApB9SrTMUkugAAAA?rs=1&pid=ImgDetMain" alt=""/>
+        <div className="userChatInfo">
+          <span>AI Assistant</span>
+          <p>ask any Questions...</p>
+        </div>
+      </div>
+      {Object.entries(chats)?.sort((a, b) => b[1].date - a[1].date).map((chat) => (
+          <div
+              className="userChat"
+              key={chat[0]}
+              onClick={() => handleSelect(chat[1].userInfo)}
+          >
           <img src={chat[1].userInfo.photoURL} alt="" />
           <div className="userChatInfo">
             <span>{chat[1].userInfo.displayName}</span>
