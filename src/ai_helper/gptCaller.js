@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 
 
+let content = "What is java";
+
 // Get the API_KEY of GPT from system environment
 const API_KEY = process.env.GPT_API_KEY;
 const openai = new OpenAI({
@@ -11,7 +13,7 @@ const openai = new OpenAI({
 async function main() {
     const stream = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages: [{role: "user", content: "Say this is a test"}],
+        messages: [{role: "user", content: content}],
         stream: true
     });
     for await (const chunk of stream) {
