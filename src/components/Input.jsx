@@ -14,6 +14,8 @@ import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
+import { encryptMessage } from '../encryption';
+
 const Input = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
@@ -22,6 +24,11 @@ const Input = () => {
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
+
+    // Encrypting the message text
+    const encryptedText = encryptMessage(text);
+
+
     if (img) {
       const storageRef = ref(storage, uuid());
 
@@ -49,7 +56,7 @@ const Input = () => {
       await updateDoc(doc(db, "chats", data.chatId), {
         messages: arrayUnion({
           id: uuid(),
-          text,
+          text: encryptedText,   // use the encrypted text
           senderId: currentUser.uid,
           date: Timestamp.now(),
         }),
