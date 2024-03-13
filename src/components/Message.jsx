@@ -1,12 +1,18 @@
 import React, { useContext, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
+import { decryptMessage } from '../encryption';
+
+
 
 const Message = ({ message }) => {
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
 
   const ref = useRef();
+
+  // decrypting the message text
+  const decryptedText = decryptMessage(message.text);
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: "smooth" });
@@ -29,7 +35,7 @@ const Message = ({ message }) => {
         <span>just now</span>
       </div>
       <div className="messageContent">
-        <p>{message.text}</p>
+        <p>{decryptedText}</p> {/* Using decrypted text*/}
         {message.img && <img src={message.img} alt="" />}
       </div>
     </div>
