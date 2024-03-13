@@ -23,6 +23,11 @@ const Input = () => {
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
 
+  console.log("Original text:", text);
+  const encryptedText = encryptMessage(text);
+  console.log("Encrypted text:", encryptedText);
+
+
   const handleSend = async () => {
 
     // Encrypting the message text
