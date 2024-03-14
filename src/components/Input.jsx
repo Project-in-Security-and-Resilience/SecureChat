@@ -68,16 +68,21 @@ const Input = () => {
       });
     }
 
+   
+
+    // encrypting the last message on the sender's side
+    const encryptedLastMessage = encryptMessage(text);
     await updateDoc(doc(db, "userChats", currentUser.uid), {
       [data.chatId + ".lastMessage"]: {
-        text,
+        text:encryptedLastMessage,
       },
       [data.chatId + ".date"]: serverTimestamp(),
     });
 
+    // decrypting the last message on the sender's side  
     await updateDoc(doc(db, "userChats", data.user.uid), {
       [data.chatId + ".lastMessage"]: {
-        text,
+        text: encryptedLastMessage,
       },
       [data.chatId + ".date"]: serverTimestamp(),
     });

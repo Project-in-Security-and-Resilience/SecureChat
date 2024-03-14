@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
 import { db } from "../firebase";
-
+import { decryptMessage } from '../encryption';
 const Chats = () => {
   const [chats, setChats] = useState([]);
 
@@ -13,7 +13,20 @@ const Chats = () => {
   useEffect(() => {
     const getChats = () => {
       const unsub = onSnapshot(doc(db, "userChats", currentUser.uid), (doc) => {
-        setChats(doc.data());
+        //setChats(doc.data());
+        let chatsData = doc.data();
+        const decryptedChats = Object.entries(chatsData).reduce((acc, [chatId, chatInfo]) => {
+          if (chatInfo.lastMessage && chatInfo.lastMessage.text) {
+              const decryptedText = decryptMessage(chatInfo.lastMessage.text); // Decrypt
+              acc[chatId] = { ...chatInfo, lastMessage: { ...chatInfo.lastMessage, text: decryptedText } };
+          } else {
+              acc[chatId] = chatInfo; // If no lastMessage or text, leave as is
+          }
+          return acc;
+      }, {});
+      
+      // Converting the decryptedChats back
+      setChats(decryptedChats);
       });
 
       return () => {
@@ -39,7 +52,7 @@ const Chats = () => {
           <img src={chat[1].userInfo.photoURL} alt="" />
           <div className="userChatInfo">
             <span>{chat[1].userInfo.displayName}</span>
-            <p>{chat[1].lastMessage?.text}</p>
+            <p>{chat[1].lastMessage?.text || "No message"}</p> {/* Display decrypted last message */}
           </div>
         </div>
       ))}
