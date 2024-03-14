@@ -13,6 +13,7 @@ import {
 import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import DOMPurify from "dompurify";
 
 const Input = () => {
   const [text, setText] = useState("");
@@ -22,6 +23,20 @@ const Input = () => {
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
+    // Check if the message text contains <script> tags
+    if (text.includes("<script>")) {
+      alert("Your message has been blocked to protect from XSS attacks."); // Show a popup
+      return; // Exit the function to prevent sending the message
+    }
+
+    // Sanitize message text
+    const sanitizedText = DOMPurify.sanitize(text);
+
+    // Check if the sanitized message text is empty
+    if (!sanitizedText.trim() && !img) {
+      alert("Please enter a message."); // Show a popup
+      return; // Exit the function if both sanitizedText and img are empty
+    }
     if (img) {
       const storageRef = ref(storage, uuid());
 
@@ -70,6 +85,7 @@ const Input = () => {
       [data.chatId + ".date"]: serverTimestamp(),
     });
 
+    // Reset text and img state
     setText("");
     setImg(null);
   };
