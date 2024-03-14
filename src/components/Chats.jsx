@@ -3,6 +3,9 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
 import { db } from "../firebase";
+import GptAccInfo from "../ai_helper/GetGptAccInfo.js";
+import {gptAccountInfos} from "../ai_helper/UNIQUE_GPT_ACCOUNT.js";
+
 
 const Chats = () => {
   const [chats, setChats] = useState([]);
@@ -24,16 +27,21 @@ const Chats = () => {
     currentUser.uid && getChats();
   }, [currentUser.uid]);
 
-  const handleSelect = (u) => {
+  const handleSelect = async (u) => {
     dispatch({ type: "CHANGE_USER", payload: u });
+  };
+  const handleSelectAI = async () => {
+    console.log("Select AI")
+    const data = await GptAccInfo();
+    dispatch({ type: "CHANGE_USER", payload: data });
   };
 
   return (
     <div className="chats">
-      <div className="userChat">
-        <img src="https://th.bing.com/th/id/OIP.bScrk0MBC5ApB9SrTMUkugAAAA?rs=1&pid=ImgDetMain" alt=""/>
+      <div className="userChat" onClick={() => handleSelectAI()}>
+        <img src= {gptAccountInfos.photoURL} alt=""/>
         <div className="userChatInfo">
-          <span>AI Assistant</span>
+          <span>{gptAccountInfos.displayName}</span>
           <p>ask any Questions...</p>
         </div>
       </div>
