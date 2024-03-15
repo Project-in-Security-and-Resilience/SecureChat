@@ -1,4 +1,4 @@
-import { doc, onSnapshot } from "firebase/firestore";
+import {doc, getDoc, onSnapshot, serverTimestamp, setDoc, updateDoc} from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
@@ -33,12 +33,52 @@ const Chats = () => {
   const handleSelectAI = async () => {
     console.log("Select AI")
     const data = await GptAccInfo();
+    console.log(data.uid);
+    console.log(currentUser.uid);
     dispatch({ type: "CHANGE_USER", payload: data });
+    //hidden the top of ai assistant
+    document.getElementById('gptDiv').style.display = 'none';
+    await handleSelectGPT(data);
+  };
+
+  const handleSelectGPT = async (user) => {
+    //check whether the group(chats in firestore) exists, if not create
+    const combinedId =
+        currentUser.uid > user.uid
+            ? currentUser.uid + user.uid
+            : user.uid + currentUser.uid;
+    try {
+      const res = await getDoc(doc(db, "chats", combinedId));
+
+      if (!res.exists()) {
+        //create a chat in chats collection
+        await setDoc(doc(db, "chats", combinedId), { messages: [] });
+
+        //create user chats
+        await updateDoc(doc(db, "userChats", currentUser.uid), {
+          [combinedId + ".userInfo"]: {
+            uid: user.uid,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+          },
+          [combinedId + ".date"]: serverTimestamp(),
+        });
+
+        await updateDoc(doc(db, "userChats", user.uid), {
+          [combinedId + ".userInfo"]: {
+            uid: currentUser.uid,
+            displayName: currentUser.displayName,
+            photoURL: currentUser.photoURL,
+          },
+          [combinedId + ".date"]: serverTimestamp(),
+        });
+      }
+    } catch (err) {}
   };
 
   return (
     <div className="chats">
-      <div className="userChat" onClick={() => handleSelectAI()}>
+      <div id="gptDiv" className="userChat" onClick={() => handleSelectAI()}>
         <img src= {gptAccountInfos.photoURL} alt=""/>
         <div className="userChatInfo">
           <span>{gptAccountInfos.displayName}</span>

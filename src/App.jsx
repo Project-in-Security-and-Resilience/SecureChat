@@ -11,7 +11,8 @@ function App() {
 
   // When run this App, the gpt account creating only run once
   useEffect(() => {
-    GenUniAcc();
+      //Because of React's strict mode, this method will be called twice, not twice in production
+      GenUniAcc();
   }, []);
 
   const { currentUser } = useContext(AuthContext);
