@@ -13,6 +13,8 @@ import {
 import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import GptAccInfo from "../ai_helper/GetGptAccInfo.js";
+import {getAIResp} from "../ai_helper/gptCaller.js";
 
 const Input = () => {
   const [text, setText] = useState("");
@@ -46,6 +48,12 @@ const Input = () => {
         }
       );
     } else {
+      const gptInfo = await GptAccInfo();
+      // If receiver is the gpt account, call gpt api automatically
+      if (data.user.uid === gptInfo.uid){
+        const reply = await getAIResp(text);
+        console.log(reply)
+      }
       await updateDoc(doc(db, "chats", data.chatId), {
         messages: arrayUnion({
           id: uuid(),
