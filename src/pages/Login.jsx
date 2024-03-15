@@ -5,6 +5,8 @@ import { auth } from "../firebase";
 
 const Login = () => {
   const [err, setErr] = useState(false);
+  const [privateKey, setPrivateKey] = useState("");
+  const [showPrivateKeyInput, setShowPrivateKeyInput] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -14,11 +16,36 @@ const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/")
+      // Check if private key exists for the user
+      const storedPrivateKey = localStorage.getItem(`${auth.currentUser?.uid}_privateKey`);
+      if (!storedPrivateKey) {
+        setShowPrivateKeyInput(true);
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setErr(true);
     }
   };
+
+  const handlePrivateKeyInputChange = (e) => {
+    setPrivateKey(e.target.value);
+  };
+
+  const handleLoginWithPrivateKey = async () => {
+    try {
+      // Perform login with private key logic here
+      console.log("Logging in with private key:", privateKey);
+      // Store the private key locally
+      localStorage.setItem(`${auth.currentUser?.uid}_privateKey`, privateKey);
+      // Example: Navigate to the next page after successful login
+      navigate("/");
+    } catch (error) {
+      console.error("Error logging in with private key:", error);
+      setErr(true);
+    }
+  };
+
   return (
     <div className="formContainer">
       <div className="formWrapper">
@@ -30,7 +57,16 @@ const Login = () => {
           <button>Sign in</button>
           {err && <span>Something went wrong</span>}
         </form>
-        <p>You don't have an account? <Link to="/register">Register</Link></p>
+        {showPrivateKeyInput && (
+          <div className="formWrapper">
+            <p>No private key found. Please enter your private key from your old device:</p>
+            <input type="text" value={privateKey} onChange={handlePrivateKeyInputChange} />
+            <button className="privateKeyInput" onClick={handleLoginWithPrivateKey}>Login with Private Key</button>
+          </div>
+        )}
+        <p>
+          You don't have an account? <Link to="/register">Register</Link>
+        </p>
       </div>
     </div>
   );
