@@ -5,6 +5,7 @@ import { auth, db, storage } from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
+import {generateKeyPair} from "../context/AuthContext";
 
 const Register = () => {
   const [err, setErr] = useState(false);
@@ -42,6 +43,12 @@ const Register = () => {
               email,
               photoURL: downloadURL,
             });
+            //generate keys
+            const { publicKey, privateKey } = await generateKeyPair();
+            // Store the public key in Firestore
+            await setDoc(doc(db, "users", res.user.uid), { publicKey },{ merge: true });
+            // Store the private key securely in browser local storage
+            localStorage.setItem(`${res.user.uid}_privateKey`, privateKey);
 
             //create empty user chats on firestore
             await setDoc(doc(db, "userChats", res.user.uid), {});
@@ -78,7 +85,7 @@ const Register = () => {
           {err && <span>Something went wrong</span>}
         </form>
         <p>
-          You do have an account? <Link to="/register">Login</Link>
+          You do have an account? <Link to="/login">Login</Link>
         </p>
       </div>
     </div>

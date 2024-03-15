@@ -2,6 +2,7 @@ import {db, auth} from "./MyFirebase.js";
 import {collection, doc, setDoc, query, where, getDocs} from "firebase/firestore";
 import {createUserWithEmailAndPassword, updateProfile} from "firebase/auth";
 import {gptAccountInfos} from "./UNIQUE_GPT_ACCOUNT.js";
+import {generateKeyPair} from "../context/AuthContext";
 
 
 const GenUniAcc = async () => {
@@ -29,10 +30,15 @@ const GenUniAcc = async () => {
                     email: gptAccountInfos.email,
                     photoURL: gptAccountInfos.photoURL,
                 });
-                // console.log("done1");
+                //generate keys
+                const { publicKey, privateKey } = await generateKeyPair();
+                // Store the public key in Firestore
+                await setDoc(doc(db, "users", res.user.uid), { publicKey },{ merge: true });
+                // Store the private key securely in browser local storage
+                localStorage.setItem(`${res.user.uid}_privateKey`, privateKey);
+
                 //create empty user chats on firestore
                 await setDoc(doc(db, "userChats", res.user.uid), {});
-                // console.log("done2");
             } catch (err) {
                 //todo transaction， rollback manually
                 console.log(err);
