@@ -53,11 +53,11 @@ const Chats = () => {
             : currentUser.uid + user.uid ;
     try {
       const res = await getDoc(doc(db, "chats", combinedId));
-      const res2 = await getDoc(doc(db, "chats", gptCombinedId));
-      if (!res2.exists()){
-        //create a gpt chat in chats collection for new user
-        await setDoc(doc(db, "chats", gptCombinedId), { messages: [] });
-      }
+      // const res2 = await getDoc(doc(db, "chats", gptCombinedId));
+      // if (!res2.exists()){
+      //   //create a gpt chat in chats collection for new user
+      //   await setDoc(doc(db, "chats", gptCombinedId), { messages: [] });
+      // }
 
       if (!res.exists()) {
         //create a chat in chats collection

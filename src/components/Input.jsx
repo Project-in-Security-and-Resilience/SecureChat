@@ -140,8 +140,8 @@ const Input = () => {
         });
 
       const gptInfo = await GptAccInfo();
-      // If receiver is the gpt account, call gpt api automatically
-      if (data.user.uid === gptInfo.uid){
+      // If receiver is the gpt account, call gpt api automatically and not support to operate pic
+      if (data.user.uid === gptInfo.uid && img===null){
           const privateKey = fetchPrivateKey(currentUser.uid);
           const decryptedMessage = await decryptWithPrivateKey(
               privateKey,
