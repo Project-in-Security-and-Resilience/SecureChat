@@ -103,6 +103,7 @@ const Input = () => {
 
       // Store both encrypted versions of the message in the database
       encryptedText = { recipient: encryptedText, sender: encryptedForSender };
+      console.log("???",encryptedText)
     }
 
     if (img) {
@@ -129,6 +130,15 @@ const Input = () => {
         }
       );
     } else {
+        await updateDoc(doc(db, "chats", data.chatId), {
+            messages: arrayUnion({
+                id: uuid(),
+                encryptedText,
+                senderId: currentUser.uid,
+                date: Timestamp.now(),
+            }),
+        });
+
       const gptInfo = await GptAccInfo();
       // If receiver is the gpt account, call gpt api automatically
       if (data.user.uid === gptInfo.uid){
@@ -137,18 +147,34 @@ const Input = () => {
               privateKey,
               encryptedText.sender
           );
+          console.log("dataChatId",data.chatId)
+          const combinedId =
+              currentUser.uid > gptInfo.uid
+                  ? gptInfo.uid + currentUser.uid
+                  : currentUser.uid + gptInfo.uid ;
+          console.log("combinedId",combinedId)
           console.log("decrypt",decryptedMessage);
           const reply = await getAIResp(decryptedMessage);
           console.log("reply",reply)
+
+          // Fetch recipient's public key from Firestore
+          const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
+          const gptPublicKey = gptDoc.data()?.publicKey;
+          const encryptedForSender = await encryptWithPublicKey(gptPublicKey, reply)
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          const userPublicKey = userDoc.data()?.publicKey;
+          const encryptedForReceiver = await encryptWithPublicKey(userPublicKey,reply)
+          const gptEncryptedText = { recipient: encryptedForReceiver, sender: encryptedForSender };
+          console.log("gptId",gptInfo.uid)
+          await updateDoc(doc(db, "chats", data.chatId), {
+              messages: arrayUnion({
+                  id: uuid(),
+                  encryptedText: gptEncryptedText,
+                  senderId: gptInfo.uid,
+                  date: Timestamp.now(),
+              }),
+          });
       }
-      await updateDoc(doc(db, "chats", data.chatId), {
-        messages: arrayUnion({
-          id: uuid(),
-          encryptedText,
-          senderId: currentUser.uid,
-          date: Timestamp.now(),
-        }),
-      });
     }
 
     await updateDoc(doc(db, "userChats", currentUser.uid), {
