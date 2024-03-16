@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import googleIcon from '../img/google.png'; // 导入 Google 图标
+import facebookIcon from '../img/facebook.png'; // 导入 Facebook 图标
 import { auth } from "../firebase";
 
 const Login = () => {
@@ -49,12 +51,16 @@ const Login = () => {
   return (
     <div className="formContainer">
       <div className="formWrapper">
-        <span className="logo">Lama Chat</span>
+        <span className="logo">Love Chat</span>
         <span className="title">Login</span>
         <form onSubmit={handleSubmit}>
-          <input type="email" placeholder="email" />
-          <input type="password" placeholder="password" />
-          <button>Sign in</button>
+          <div className="input-group">
+            <input type="email" name="email" placeholder="Enter email" required />
+          </div>
+          <div className="input-group">
+            <input type="password" name="password" placeholder="Password" required />
+          </div>
+          <button type="submit">Sign In</button>
           {err && <span>Something went wrong</span>}
         </form>
         {showPrivateKeyInput && (
@@ -64,9 +70,20 @@ const Login = () => {
             <button className="privateKeyInput" onClick={handleLoginWithPrivateKey}>Login with Private Key</button>
           </div>
         )}
-        <p>
-          You don't have an account? <Link to="/register">Register</Link>
-        </p>
+        <div className="social-login">
+          <p className="social-login-text">Or continue with</p>
+          <div className="social-buttons">
+            <button className="social-button google" onClick={() => {/* Google 登录逻辑 */}}>
+              <img src={googleIcon} alt="Google" className="social-icon" />
+            </button>
+            <button className="social-button facebook" onClick={() => {/* Facebook 登录逻辑 */}}>
+              <img src={facebookIcon} alt="Facebook" className="social-icon" />
+            </button>
+          </div>
+        </div>
+        <div className="register">
+          <p>Not a member? <Link to="/register">Register now</Link></p>
+        </div>
       </div>
     </div>
   );

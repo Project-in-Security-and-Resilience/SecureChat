@@ -10,10 +10,11 @@ const Navbar = () => {
   const refresh = async ()=>{
       location.reload();
   }
+  
 
   return (
     <div className='navbar'>
-      <span className="logo">SexureXChat</span>
+      <span className="logo">SecureXChat</span>
       <div className="user">
         <img src={currentUser.photoURL} alt="" />
         <span>{currentUser.displayName}</span>
