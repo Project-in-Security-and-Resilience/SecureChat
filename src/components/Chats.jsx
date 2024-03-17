@@ -31,10 +31,7 @@ const Chats = () => {
     dispatch({ type: "CHANGE_USER", payload: u });
   };
   const handleSelectAI = async () => {
-    console.log("Select AI")
     const data = await GptAccInfo();
-    console.log(data.uid);
-    console.log(currentUser.uid);
     dispatch({ type: "CHANGE_USER", payload: data });
     //hidden the top of ai assistant
     document.getElementById('gptDiv').style.display = 'none';
