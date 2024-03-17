@@ -31,12 +31,11 @@ const ShowPrivateKey = () => {
 
   return (
     <div className="showPrivateKeyContainer">
-      <button onClick={handleShowPrivateKey}>Show Key</button>
+      <button onClick={handleShowPrivateKey}>Reveal E2E Private Key</button>
       {showModal && (
         <div className="modal">
           <div className="modalContent">
             <span className="closeButton" onClick={handleCloseModal}>&times;</span>
-            <p>Your private key:</p>
             <textarea rows={5} cols={50} value={privateKey} readOnly />
             <div className="buttonGroup">
               <button onClick={handleCopyPrivateKey}>Copy</button>
