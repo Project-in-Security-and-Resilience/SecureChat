@@ -28,7 +28,7 @@ const Chat = () => {
           <img src={More} alt="" />
         </div>
       </div>
-      <button onClick={toggleStegModal}>Send/Decode hidden message</button>
+      <button className="sendDecode" onClick={toggleStegModal}>Send/Decode hidden message</button>
       {isStegModalOpen && (
         <div className="modalBackdrop" onClick={toggleStegModal}>
           <div className="steganographyModal" onClick={e => e.stopPropagation()}>
