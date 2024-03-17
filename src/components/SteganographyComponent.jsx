@@ -28,7 +28,6 @@ const SteganographyComponent = () => {
 
     reader.onload = (e) => {
       const decodedMessage = steg.decode(e.target.result);
-      console.log(decodedMessage);
       setDecodedText(decodedMessage);
     };
 
