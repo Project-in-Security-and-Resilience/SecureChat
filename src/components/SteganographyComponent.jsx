@@ -26,38 +26,43 @@
  * - decodedText: The text decoded from the encoded image.
 **/
 
-
 import React, { useState } from 'react';
-//import steg from '../lib/steganography.min.js'; // Assuming steg is converted to a module
-//import { steg } from '../';
 
 const SteganographyComponent = () => {
+  // State for storing the source image URL, encoded image URL, text to hide, and decoded text.
   const [sourceImage, setSourceImage] = useState('');
   const [encodedImage, setEncodedImage] = useState('');
   const [textToHide, setTextToHide] = useState('');
   const [decodedText, setDecodedText] = useState('');
 
+
+  // Function to read and set the source image from the file input
   const readURL = (file) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
+      // Set the read image as source image
       setSourceImage(e.target.result);
     };
 
     reader.readAsDataURL(file);   
   }
 
+  // Function to encode text into the source image
   const hideText = () => {
     const encodedDataUri = steg.encode(textToHide, sourceImage);
     setEncodedImage(encodedDataUri);
   }
 
+  // Function to decode text from an image
   const decode = (file) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
       const decodedMessage = steg.decode(e.target.result);
-      console.log(decodedMessage);
+      //console.log(decodedMessage);
+      
+      // Set the decoded text
       setDecodedText(decodedMessage);
     };
 
