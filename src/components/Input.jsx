@@ -12,9 +12,12 @@ import {
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
+import GptAccInfo from "../ai_helper/GetGptAccInfo.js";
+import {getAIResp} from "../ai_helper/gptCaller.js";
 import { getDownloadURL, ref, uploadBytesResumable, } from "firebase/storage";
 import DOMPurify from "dompurify";
 import {fetchPrivateKey} from "./Message";
+import { decryptWithPrivateKey } from "./Message";
 
 async function encryptWithPublicKey(publicKeyString, message) {
   try {
@@ -100,6 +103,7 @@ const Input = () => {
 
       // Store both encrypted versions of the message in the database
       encryptedText = { recipient: encryptedText, sender: encryptedForSender };
+      console.log("???",encryptedText)
     }
 
     if (img) {
@@ -126,14 +130,51 @@ const Input = () => {
         }
       );
     } else {
-      await updateDoc(doc(db, "chats", data.chatId), {
-        messages: arrayUnion({
-          id: uuid(),
-          encryptedText,
-          senderId: currentUser.uid,
-          date: Timestamp.now(),
-        }),
-      });
+        await updateDoc(doc(db, "chats", data.chatId), {
+            messages: arrayUnion({
+                id: uuid(),
+                encryptedText,
+                senderId: currentUser.uid,
+                date: Timestamp.now(),
+            }),
+        });
+
+      const gptInfo = await GptAccInfo();
+      // If receiver is the gpt account, call gpt api automatically and not support to operate pic
+      if (data.user.uid === gptInfo.uid && img===null){
+          const privateKey = fetchPrivateKey(currentUser.uid);
+          const decryptedMessage = await decryptWithPrivateKey(
+              privateKey,
+              encryptedText.sender
+          );
+          console.log("dataChatId",data.chatId)
+          const combinedId =
+              currentUser.uid > gptInfo.uid
+                  ? gptInfo.uid + currentUser.uid
+                  : currentUser.uid + gptInfo.uid ;
+          console.log("combinedId",combinedId)
+          console.log("decrypt",decryptedMessage);
+          const reply = await getAIResp(decryptedMessage);
+          console.log("reply",reply)
+
+          // Fetch recipient's public key from Firestore
+          const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
+          const gptPublicKey = gptDoc.data()?.publicKey;
+          const encryptedForSender = await encryptWithPublicKey(gptPublicKey, reply)
+          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+          const userPublicKey = userDoc.data()?.publicKey;
+          const encryptedForReceiver = await encryptWithPublicKey(userPublicKey,reply)
+          const gptEncryptedText = { recipient: encryptedForReceiver, sender: encryptedForSender };
+          console.log("gptId",gptInfo.uid)
+          await updateDoc(doc(db, "chats", data.chatId), {
+              messages: arrayUnion({
+                  id: uuid(),
+                  encryptedText: gptEncryptedText,
+                  senderId: gptInfo.uid,
+                  date: Timestamp.now(),
+              }),
+          });
+      }
     }
 
     await updateDoc(doc(db, "userChats", currentUser.uid), {

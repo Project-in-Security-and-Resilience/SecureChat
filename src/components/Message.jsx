@@ -15,7 +15,7 @@ export function fetchPrivateKey(useruid) {
   return privateKey;
 }
 
-async function decryptWithPrivateKey(privateKeyString, encryptedMessageBase64) {
+export async function decryptWithPrivateKey(privateKeyString, encryptedMessageBase64) {
   try {
       // Decode the Base64-encoded encrypted message
       const encryptedMessageBuffer = Uint8Array.from(atob(encryptedMessageBase64), c => c.charCodeAt(0));

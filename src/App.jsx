@@ -3,11 +3,19 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import "./style.scss";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "./context/AuthContext";
 import SteganographyComponent from "./components/SteganographyComponent";
+import GenUniAcc from "./ai_helper/GenUniAcc";
 
 function App() {
+
+  // When run this App, the gpt account creating only run once
+  useEffect(() => {
+      //Because of React's strict mode, this method will be called twice, not twice in production
+      GenUniAcc();
+  }, []);
+
   const { currentUser } = useContext(AuthContext);
 
   const ProtectedRoute = ({ children }) => {
