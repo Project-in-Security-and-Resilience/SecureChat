@@ -5,6 +5,7 @@ import "./style.scss";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./context/AuthContext";
+import SteganographyComponent from "./components/SteganographyComponent";
 import GenUniAcc from "./ai_helper/GenUniAcc";
 
 function App() {
