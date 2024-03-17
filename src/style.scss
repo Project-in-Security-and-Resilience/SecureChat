@@ -405,8 +405,8 @@
 
           img {
             background-color: #ddddf7;
-            height: 24px;
-            width: 24px;
+            height: 35px;
+            width: 35px;
             border-radius: 50%;
             object-fit: cover;
           }
@@ -726,3 +726,26 @@ button:hover {
 
 
 //个人信息
+.userInfoModal {
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%; 
+  background-color: white; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 10; 
+  
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.userInfoModal {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+
