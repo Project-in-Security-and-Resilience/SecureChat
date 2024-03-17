@@ -61,7 +61,7 @@ const SteganographyComponent = () => {
     reader.onload = (e) => {
       const decodedMessage = steg.decode(e.target.result);
       //console.log(decodedMessage);
-      
+
       // Set the decoded text
       setDecodedText(decodedMessage);
     };
@@ -87,6 +87,7 @@ const SteganographyComponent = () => {
     decode(event.target.files[0]);
   };
 
+  //  renders the UI
   return (
     <div className="cont">
       <input
