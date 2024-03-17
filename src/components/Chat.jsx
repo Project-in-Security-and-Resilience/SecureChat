@@ -1,9 +1,9 @@
 /**
  * * Chat Component:
- * This component is responsible for rendering the chat interface in the application. 
- * It utilizes the context from ChatContext to access and display user and chat data. 
- * Additionally, it integrates a feature for steganography, allowing users to encode 
- * and decode hidden messages within images directly from the chat interface
+  * This component is responsible for rendering the chat interface in the application. 
+  * It utilizes the context from ChatContext to access and display user and chat data. 
+  * Additionally, it integrates a feature for steganography, allowing users to encode 
+  * and decode hidden messages within images directly from the chat interface
  * 
  * * Features:
  * - Displays the current user's display name at the top of the chat.

@@ -19,12 +19,12 @@
  *  chat data in Firestore.
  * 
  * * Functions:
- * -  handleSelect(u)`: Triggers upon selecting a chat from the list, updating the global chat 
- *    context to reflect the selected user.
- * -  handleSelectAI()`: Initiates a chat session with the AI assistant by updating the global 
- *    chat context and handling necessary Firestore document updates for the chat.
- * -  handleSelectGPT(user)`: Checks for an existing chat with the AI assistant in Firestore and
- *     creates it if not found. Also updates user chat documents to include the AI assistant chat.
+ * - handleSelect(u)`: Triggers upon selecting a chat from the list, updating the global chat 
+ *   context to reflect the selected user.
+ * - handleSelectAI()`: Initiates a chat session with the AI assistant by updating the global 
+ *   chat context and handling necessary Firestore document updates for the chat.
+ * - handleSelectGPT(user)`: Checks for an existing chat with the AI assistant in Firestore and
+ *   creates it if not found. Also updates user chat documents to include the AI assistant chat.
  * 
  * * Usage:
  * - Render the `Chats` component within a user interface where a list of chat conversations is required.
