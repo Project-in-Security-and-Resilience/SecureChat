@@ -1,3 +1,27 @@
+/**
+ ** Search Componenent:
+ * The Search component enables users to search for other users by their display names within the
+ * SecureXChat application.
+ * Upon finding a user, it allows the current user to initiate a new chat with the selected user. 
+ * This component interacts with Firebase Firestore to query the user database and to create 
+ * or update chat documents as necessary.
+ * 
+ * * State:
+ * - username (string): Holds the search query input by the user.
+ * - user (object | null): Stores the found user's data or null if no user is found or before a search is made.
+ * - err (boolean): Indicates whether an error occurred during the search operation (e.g., user not found).
+ * 
+ * * Functions:
+ * - handleSearch: Executes the search query against the Firestore database, looking for a user whose displayName matches
+ *   the search query. Sets the found user in the state or triggers an error state if the user is not found.
+ * - handleKey: Listens for the "Enter" key event on the search input field to trigger the search operation.
+ * - handleSelect: Handles the selection of a found user, checking for an existing chat document between the current user
+ *   and the selected user. If no chat exists, it creates a new chat document and updates both users' chat lists in Firestore.
+ * 
+ * 
+ * */
+
+
 import React, { useContext, useState } from "react";
 import {
   collection,
@@ -13,13 +37,16 @@ import {
 import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
 const Search = () => {
-  const [username, setUsername] = useState("");
-  const [user, setUser] = useState(null);
-  const [err, setErr] = useState(false);
+  const [username, setUsername] = useState(""); // State to track the search input
+  const [user, setUser] = useState(null); // State to hold the found user's data
+  const [err, setErr] = useState(false); // State to track any error during search or processing
 
-  const { currentUser } = useContext(AuthContext);
+
+  const { currentUser } = useContext(AuthContext); // Using AuthContext to access current user's data
 
   const handleSearch = async () => {
+
+    // Firestore query to find user by displayName
     const q = query(
       collection(db, "users"),
       where("displayName", "==", username)
@@ -87,10 +114,10 @@ const Search = () => {
           value={username}
         />
       </div>
-      {err && <span>User not found!</span>}
+      {err && <span>User not found!</span>} // Displaying an error message if no user is found
       {user && (
         <div className="userChat" onClick={handleSelect}>
-          <img src={user.photoURL} alt="" />
+          <img src={user.photoURL} alt="" /> // Displaying found user's profile picture and name
           <div className="userChatInfo">
             <span>{user.displayName}</span>
           </div>
