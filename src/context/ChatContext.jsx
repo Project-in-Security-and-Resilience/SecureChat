@@ -52,6 +52,8 @@ export const ChatContextProvider = ({ children }) => {
               ? currentUser.uid + action.payload.uid
               : action.payload.uid + currentUser.uid,
         };
+        case "CLEAR_CONTEXT":
+          return action.payload;
 
       default:
         return state;

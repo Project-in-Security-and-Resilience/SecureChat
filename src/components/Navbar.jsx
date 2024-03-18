@@ -21,20 +21,37 @@ import React, { useState, useContext } from 'react';
 import { signOut } from "firebase/auth";
 import { auth } from '../firebase';
 import { AuthContext } from '../context/AuthContext';
+import { ChatContext } from "../context/ChatContext";
 import SVGComponent from './SVGComponent';
 import DisplayKey from "./DisplayKey";
 
 const Navbar = () => {
   const { currentUser } = useContext(AuthContext);// Using useContext to access the current authenticated user's data
   const [showUserInfo, setShowUserInfo] = useState(false);
-// Function to refresh the page, used after signing out to reset application state
-  const refresh = async () => {
-      location.reload();
-  };
+  const { dispatch } = useContext(ChatContext);
 
   const toggleUserInfo = () => {
     setShowUserInfo(!showUserInfo);
   };
+
+   const clearChatContext = () => {
+    dispatch({ type: "CLEAR_CONTEXT", payload: {
+      chatId: "null",
+      user: {},
+    } });
+  };
+
+  // Function to handle logout
+  const handleLogout = () => {
+    signOut(auth).then(() => {
+      clearChatContext()
+      // Additional logic after logout if needed
+    }).catch((error) => {
+      // Handle sign-out errors
+      console.error('Sign out error:', error);
+    });
+  };
+
 
   // renders the UI
   return (
@@ -52,7 +69,7 @@ const Navbar = () => {
               <DisplayKey />
             </div>
             <div className="userInfoActions">
-              <button onClick={() => signOut(auth)}>Logout</button>
+              <button onClick={handleLogout}>Logout</button>
               <button onClick={toggleUserInfo}>Close</button>
             </div>
           </div>
