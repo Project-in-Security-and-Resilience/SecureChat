@@ -43,6 +43,7 @@ import { useNavigate, Link } from "react-router-dom";
 import {generateKeyPair} from "../context/AuthContext";
 import SVGComponent from '../components/SVGComponent';
 
+
 const Register = () => {
   const [err, setErr] = useState(false);
   const [loading, setLoading] = useState(false);

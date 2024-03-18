@@ -27,9 +27,20 @@
 **/
 
 import React, { useState } from 'react';
+//const steg = require("");
 
 const SteganographyComponent = () => {
   // State for storing the source image URL, encoded image URL, text to hide, and decoded text.
+  const script = document.createElement('script')
+  script.src = '/steganography.min.js'; // Adjust the path as needed
+  script.async = true;
+  script.onload = () => {
+    // Script has loaded, now you can use window.steg
+    console.log('Steganography library is loaded.');
+  };
+
+  document.body.appendChild(script);
+
   const [sourceImage, setSourceImage] = useState('');
   const [encodedImage, setEncodedImage] = useState('');
   const [textToHide, setTextToHide] = useState('');
