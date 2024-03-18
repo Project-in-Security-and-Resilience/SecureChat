@@ -114,10 +114,10 @@ const Search = () => {
           value={username}
         />
       </div>
-      {err && <span>User not found!</span>} // Displaying an error message if no user is found
+      {err && <span>User not found!</span>}
       {user && (
         <div className="userChat" onClick={handleSelect}>
-          <img src={user.photoURL} alt="" /> // Displaying found user's profile picture and name
+          <img src={user.photoURL} alt="" />
           <div className="userChatInfo">
             <span>{user.displayName}</span>
           </div>
