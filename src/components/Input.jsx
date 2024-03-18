@@ -88,7 +88,6 @@ async function encryptWithPublicKey(publicKeyString, message) {
 
       return encryptedMessageBase64;
   } catch (error) {
-      console.error("Error encrypting message:", error);
       throw error;
   }
 }
@@ -122,11 +121,9 @@ const Input = () => {
       // Fetch recipient's public key from Firestore
       const recipientDoc = await getDoc(doc(db, "users", data.user.uid)); // Use getDoc here
       const recipientPublicKey = recipientDoc.data()?.publicKey;
-      console.log(recipientPublicKey)
 
       // Encrypt the message using the recipient's public key
       encryptedText = await encryptWithPublicKey(recipientPublicKey,sanitizedText);
-      console.log("enc text",encryptedText)
 
       // Fetch recipient's public key from Firestore
       const senderDoc = await getDoc(doc(db, "users", currentUser.uid)); // Use getDoc here
@@ -137,7 +134,6 @@ const Input = () => {
 
       // Store both encrypted versions of the message in the database
       encryptedText = { recipient: encryptedText, sender: encryptedForSender };
-      console.log("???",encryptedText)
     }
 
     // Handle image uploads separately
@@ -183,15 +179,11 @@ const Input = () => {
               privateKey,
               encryptedText.sender
           );
-          console.log("dataChatId",data.chatId)
           const combinedId =
               currentUser.uid > gptInfo.uid
                   ? gptInfo.uid + currentUser.uid
                   : currentUser.uid + gptInfo.uid ;
-          console.log("combinedId",combinedId)
-          console.log("decrypt",decryptedMessage);
           const reply = await getAIResp(decryptedMessage);
-          console.log("reply",reply)
 
           // Fetch recipient's public key from Firestore
           const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
@@ -201,7 +193,6 @@ const Input = () => {
           const userPublicKey = userDoc.data()?.publicKey;
           const encryptedForReceiver = await encryptWithPublicKey(userPublicKey,reply)
           const gptEncryptedText = { recipient: encryptedForReceiver, sender: encryptedForSender };
-          console.log("gptId",gptInfo.uid)
           await updateDoc(doc(db, "chats", data.chatId), {
               messages: arrayUnion({
                   id: uuid(),
@@ -240,7 +231,6 @@ const Input = () => {
         value={text}
       />
       <div className="send">
-        <img src={Attach} alt="" />
         <input
           type="file"
           style={{ display: "none" }}

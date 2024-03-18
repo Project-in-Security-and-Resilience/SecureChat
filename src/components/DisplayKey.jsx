@@ -64,12 +64,11 @@ const ShowPrivateKey = () => {
 
   return (
     <div className="showPrivateKeyContainer">
-      <button onClick={handleShowPrivateKey}>Show Key</button>  {/* Button to trigger the display of the private key */}
+      <button onClick={handleShowPrivateKey}>Reveal E2E Private Key</button> {/* Button to trigger the display of the private key */}
       {showModal && (
         <div className="modal">
           <div className="modalContent">
-            <span className="closeButton" onClick={handleCloseModal}>&times;</span>  {/* Close button for the modal */}
-            <p>Your private key:</p>
+            <span className="closeButton" onClick={handleCloseModal}>&times;</span>
             <textarea rows={5} cols={50} value={privateKey} readOnly /> {/* Textarea for the private key, read-only */}
             <div className="buttonGroup">
               <button onClick={handleCopyPrivateKey}>Copy</button> {/* Button to copy the private key */}

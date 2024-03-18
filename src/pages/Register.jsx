@@ -41,12 +41,35 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import {generateKeyPair} from "../context/AuthContext";
+import SVGComponent from '../components/SVGComponent';
 
 const Register = () => {
   const [err, setErr] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  var isFileSelected = false;
 
+  // Check form info, focusing on Avatar
+  const checkInfo = (e) =>{
+    //Check if select file
+    if (!isFileSelected){
+      alert("Please select an Avatar");
+    }
+  }
+
+  //Check the type of file is Img
+  const checkImg = (e) =>{
+    const file = e.target.files[0]; // Get the fill selected
+    const supportedFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+
+    if (file && !supportedFormats.includes(file.type)) {
+      alert('Not support this file, Please choose a Image');
+      e.target.value = ''; // Clear the value
+    } else {
+      // mark file selected
+      isFileSelected = true;
+    }
+  }
   const handleSubmit = async (e) => {
     setLoading(true); // Begin loading phase
     e.preventDefault(); // Prevent default form submission behavior
@@ -62,6 +85,13 @@ const Register = () => {
       //Create a unique image name
       const date = new Date().getTime();
       const storageRef = ref(storage, `${displayName + date}`);
+
+      // Check the image type
+      if (!file.type.match('image.*')) {
+        alert("Must Only Select Image.");
+        e.target[3].value = '';
+        return;
+      }
 
       await uploadBytesResumable(storageRef, file).then(() => {
         getDownloadURL(storageRef).then(async (downloadURL) => {
@@ -105,20 +135,20 @@ const Register = () => {
   return (
     <div className="formContainer">
       <div className="formWrapper">
-        <span className="logo">Love Chat</span>
+        <span className="logo"><SVGComponent color="green"/></span>
         <span className="title">Register</span>
         <form onSubmit={handleSubmit}>
-          {/* Input fields for display name, email, password, and file upload for avatar */}
-          {/* ... */}
-          <input required type="text" placeholder="display name" />
-          <input required type="email" placeholder="email" />
-          <input required type="password" placeholder="password" />
-          <input required style={{ display: "none" }} type="file" id="file" />
+            {/* Input fields for display name, email, password, and file upload for avatar */}
+          <input required type="text" placeholder="Username" />
+          <input required type="email" placeholder="Email" />
+          <input required type="password" placeholder="Password" />
+          <input required style={{ display: "none" }} type="file" id="file"
+                 accept="image/png, image/jpeg, image/jpg" onChange={checkImg} />
           <label htmlFor="file">
-            <img src={Add} alt="" />
-            <span>Add an avatar</span>
+            <img style={{width:"30px", height:"30px",cursor:"pointer"}} src={Add} alt=""/>
+            <p>Add an avatar</p>
           </label>
-          <button disabled={loading}>Sign up</button>
+          <button disabled={loading} onClick={checkInfo}>Sign up</button>
           {loading && "Uploading and compressing the image please wait..."}
           {err && <span>Something went wrong</span>}  // Error message
         </form>

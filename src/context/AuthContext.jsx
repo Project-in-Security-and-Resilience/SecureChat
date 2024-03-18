@@ -58,27 +58,6 @@ export async function generateKeyPair() {
   }
 }
 
-
-
-// Function to decrypt an encrypted message using a provided encryption key and IV
-async function decryptMessage(encryptedMessage, key, iv) {
-  // Decrypt the encrypted message using the provided encryption key and IV
-  const decryptedData = await window.crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: iv,
-    },
-    key,
-    encryptedMessage
-  );
-
-  // Convert the decrypted ArrayBuffer to a string
-  const decryptedMessage = new TextDecoder().decode(decryptedData);
-
-  // Return the decrypted message
-  return decryptedMessage;
-}
-
 export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {

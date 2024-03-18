@@ -59,7 +59,6 @@ export async function decryptWithPrivateKey(privateKeyString, encryptedMessageBa
 
       // Decode the Base64-encoded private key string
       const privateKeyBuffer = Uint8Array.from(atob(privateKeyString), c => c.charCodeAt(0));
-      console.log(" decrypting key buff:",privateKeyBuffer)
       // Import the private key
       const privateKey = await window.crypto.subtle.importKey(
           "pkcs8",
@@ -71,7 +70,6 @@ export async function decryptWithPrivateKey(privateKeyString, encryptedMessageBa
           true,
           ["decrypt"]
       );
-      console.log(" decrypting key :",privateKey)
       // Decrypt the encrypted message using the private key
       const decryptedMessageBuffer = await window.crypto.subtle.decrypt(
           {
@@ -80,13 +78,10 @@ export async function decryptWithPrivateKey(privateKeyString, encryptedMessageBa
           privateKey,
           encryptedMessageBuffer
       );
-      console.log(" decrypting message buff:",decryptedMessageBuffer)
       // Convert the decrypted message buffer to a string
       const decryptedMessage = new TextDecoder().decode(decryptedMessageBuffer);
-      console.log(" decrypting message:",decryptedMessage)
       return decryptedMessage;
   } catch (error) {
-      console.error("Error decrypting message:", error);
       throw error;
   }
 }
@@ -117,12 +112,9 @@ const Message = ({ message }) => {
           );
           setDecryptedMes(decryptedMessage);
         }catch(error){
-          console.error("Error decrypting message:", error);
         }
       }catch(error){
-        console.error("Error decrypting message:", error);
         }
-        console.error("Error decrypting message:", error);
       }
     };
 

@@ -52,14 +52,8 @@ const Chat = () => {
         <span>{data.user?.displayName}</span> {/* Display the current user's display name */}
         {/* Display chat-related icons */}
         <div className="chatIcons">
-          <img src={Cam} alt="" />
-          <img src={Add} alt="" />
-          <img src={More} alt="" />
-        </div>
-      </div>
-       {/* Button to toggle the steganography modal */}
-      <button className="sendDecode" onClick={toggleStegModal}>Send/Decode hidden message</button>
-
+          {/* Button to toggle the steganography modal */}
+          <button className="sendDecode" onClick={toggleStegModal}>Text to Image Encode</button>
       {/* Conditionally render the steganography modal based on isStegModalOpen state */}
       {isStegModalOpen && (
         <div className="modalBackdrop" onClick={toggleStegModal}>
@@ -70,6 +64,9 @@ const Chat = () => {
         </div>
         
       )}
+        </div>
+      </div>
+      
       
       <Messages /> {/* Render Messages component */}
       <Input/>  {/* Render Input component */}

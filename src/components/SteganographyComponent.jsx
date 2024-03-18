@@ -60,8 +60,6 @@ const SteganographyComponent = () => {
 
     reader.onload = (e) => {
       const decodedMessage = steg.decode(e.target.result);
-      //console.log(decodedMessage);
-
       // Set the decoded text
       setDecodedText(decodedMessage);
     };
@@ -89,53 +87,58 @@ const SteganographyComponent = () => {
 
   //  renders the UI
   return (
-    <div className="cont">
-      <input
-        className="ui primary button"
-        type="file"
-        name="pic"
-        accept="image/*"
-        onChange={handleSourceImageChange}
-      />
-      <div className="ui input">
-        <input
-          type="text"
-          value={textToHide}
-          onChange={(e) => setTextToHide(e.target.value)}
-        />
-      </div>
-      <button className="ui secondary button" onClick={hideText}>
-        Hide Message Into Image
-      </button>
-
-      <div className="imageContainer">
-      <div className="img-cont">
-        <div className="img1">
-          <h5 className="sourcePic">Source Image</h5>
-          <img className="sourcePic" src={sourceImage} alt="Source"/>
+    <div>
+      <div className='encodeSection'>
+        <span className="title">Hide Text In Image</span>
+        <div className="cont">
+          <input
+            className="imageInput"
+            type="file"
+            name="pic"
+            accept="image/*"
+            onChange={handleSourceImageChange}
+          />
+          
+            <input
+              type="text"
+              placeholder='Enter Message...'
+              value={textToHide}
+              onChange={(e) => setTextToHide(e.target.value)}
+            />
+          
+          <button className="downloadButton" onClick={hideText}>
+            Encode
+          </button>
         </div>
-
-        <div>
-          <h5 className="encodedText">Encoded Image</h5>
-          <img className="encodedPic" src={encodedImage} alt="Encoded"/>
+        
+        <div className="cont">
+          <div className="img-cont">
+            <div className="img1">
+              <h5 className="sourcePic">Source Image</h5>
+              <img className="sourcePic" src={sourceImage}/>
+            </div>
+            <div>
+              <h5 className="encodedText">Encoded Image</h5>
+              <img className="encodedPic" src={encodedImage}/>
+            </div>
+            <button onClick={handleDownload} className="downloadButton">Download Encoded Image</button>  
+          </div>
         </div>
-        <button onClick={handleDownload} className="downloadButton">Download</button>
-                
-              
       </div>
-      </div>
-
-      <div>
-        <input
-          className="ui secondary button"
-          type="file"
-          name="pic"
-          accept="image/*"
-          onChange={handleEncodedImageChange}
-        />
+      <div className='decodeSection'>
+        <span className="title">Decode Image To Text</span>
         <div>
-          <h5 className="decodedText">Decoded Text:</h5>
-          <h2 className="decodedText"> {decodedText}</h2>
+          <input
+            className="imageInput"
+            type="file"
+            name="pic"
+            accept="image/*"
+            onChange={handleEncodedImageChange}
+          />
+          <div>
+            <h5 className="decodedText">Decoded Text:</h5>
+            <h2 className="decodedText"> {decodedText}</h2>
+          </div>
         </div>
       </div>
     </div>

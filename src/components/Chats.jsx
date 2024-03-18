@@ -74,10 +74,7 @@ const Chats = () => {
 
    // Handler for selecting the AI assistant
   const handleSelectAI = async () => {
-    console.log("Select AI")
     const data = await GptAccInfo(); // Fetch AI account info
-    console.log(data.uid);
-    console.log(currentUser.uid);
     dispatch({ type: "CHANGE_USER", payload: data });
     //hidden the top of ai assistant
     document.getElementById('gptDiv').style.display = 'none'; // Hide the AI assistant entry in UI
@@ -97,11 +94,6 @@ const Chats = () => {
             : currentUser.uid + user.uid ;
     try {
       const res = await getDoc(doc(db, "chats", combinedId));
-      // const res2 = await getDoc(doc(db, "chats", gptCombinedId));
-      // if (!res2.exists()){
-
-      //   await setDoc(doc(db, "chats", gptCombinedId), { messages: [] });
-      // }
 
       if (!res.exists()) {
         //create a chat in chats collection

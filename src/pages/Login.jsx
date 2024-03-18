@@ -45,6 +45,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import googleIcon from '../img/google.png'; // 导入 Google 图标
 import facebookIcon from '../img/facebook.png'; // 导入 Facebook 图标
 import { auth } from "../firebase";
+import SVGComponent from '../components/SVGComponent';
 
 const Login = () => {
   const [err, setErr] = useState(false);
@@ -92,15 +93,16 @@ const Login = () => {
       setErr(true);
     }
   };
+  
 
   return (
     <div className="formContainer">
       <div className="formWrapper">
-        <span className="logo">Love Chat</span> {/* App logo  */}
+        <span className="logo"><SVGComponent color="green"/></span>
         <span className="title">Login</span>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <input type="email" name="email" placeholder="Enter email" required />
+            <input type="email" name="email" placeholder="Email" required />
           </div>
           <div className="input-group">
             <input type="password" name="password" placeholder="Password" required />
@@ -115,20 +117,9 @@ const Login = () => {
             <button className="privateKeyInput" onClick={handleLoginWithPrivateKey}>Login with Private Key</button>
           </div>
         )}
-        <div className="social-login">
-          <p className="social-login-text">Or continue with</p>
-          <div className="social-buttons">
-            <button className="social-button google" onClick={() => {/* Google login */}}>
-              <img src={googleIcon} alt="Google" className="social-icon" />
-            </button>
-            <button className="social-button facebook" onClick={() => {/* Facebook login*/}}>
-              <img src={facebookIcon} alt="Facebook" className="social-icon" />
-            </button>
-          </div>
-        </div>
-        {/* Link to the registration page for new users */}
+{/* Link to the registration page for new users */}
         <div className="register">
-          <p>Not a member? <Link to="/register">Register now</Link></p>
+          <p>Not a member? <Link style={{color:"green"}} to="/register">Register now</Link></p>
         </div>
       </div>
     </div>
