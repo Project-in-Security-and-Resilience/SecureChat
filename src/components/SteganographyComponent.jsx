@@ -1,33 +1,66 @@
+/**
+ *  * SteganographyComponent:
+ *  This is a React component that provides a user interface for encoding, and 
+ * decoding hidden messages within images using steganography. This component allows users to select an image,
+ *  input text to hide within that image, and then download the encoded image with the hidden message. 
+ * It also supports decoding a hidden message from an encoded image.
+ * 
+ * * Requirements:
+ * This component assumes the existence of a steganography library (`steg`) 
+ *  and imported at the top of the file. The library must provide at least two methods: 
+ * `encode(text, image)` to hide text within an image, and `decode(image)`
+ *  to extract hidden text from an image.
+ * 
+ * * Functions:
+ * - readURL(file): Reads a selected file and sets the source image to the read result.
+ * - hideText(): Encodes the specified text into the source image and updates the encoded image state.
+ * - decode(file): Decodes the text hidden within the selected image file and updates the decoded text state.
+ * - handleDownload(): Triggers the download of the encoded image with the hidden message.
+ * - handleSourceImageChange(event): Handles changes to the source image file input and processes the selected file.
+ * - handleEncodedImageChange(event): Handles changes to the encoded image file input for decoding and processes the selected file.
+ 
+* * State:
+ * - sourceImage: The data URL of the source image selected by the user.
+ * - encodedImage: The data URL of the image after encoding the text.
+ * - textToHide: The text input by the user to hide within the image.
+ * - decodedText: The text decoded from the encoded image.
+**/
+
 import React, { useState } from 'react';
-//import steg from '../lib/steganography.min.js'; // Assuming steg is converted to a module
-//import { steg } from '../';
 
 const SteganographyComponent = () => {
+  // State for storing the source image URL, encoded image URL, text to hide, and decoded text.
   const [sourceImage, setSourceImage] = useState('');
   const [encodedImage, setEncodedImage] = useState('');
   const [textToHide, setTextToHide] = useState('');
   const [decodedText, setDecodedText] = useState('');
 
+
+  // Function to read and set the source image from the file input
   const readURL = (file) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
+      // Set the read image as source image
       setSourceImage(e.target.result);
     };
 
     reader.readAsDataURL(file);   
   }
 
+  // Function to encode text into the source image
   const hideText = () => {
     const encodedDataUri = steg.encode(textToHide, sourceImage);
     setEncodedImage(encodedDataUri);
   }
 
+  // Function to decode text from an image
   const decode = (file) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
       const decodedMessage = steg.decode(e.target.result);
+      // Set the decoded text
       setDecodedText(decodedMessage);
     };
 
@@ -52,6 +85,7 @@ const SteganographyComponent = () => {
     decode(event.target.files[0]);
   };
 
+  //  renders the UI
   return (
     <div>
       <div className='encodeSection'>

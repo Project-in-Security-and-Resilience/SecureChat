@@ -1,3 +1,39 @@
+/**
+ ** Message Component:
+ *  The Message component is designed for use in a chat application that incorporates
+ *  end-to-end encryption. 
+ *  It displays individual chat messages, handling both text and image messages. 
+ *  The component also supports decrypting 
+ *  messages using RSA-OAEP, ensuring that only the intended recipient can read the message content.
+ * 
+ * * Dependencies:
+ * - React and its hooks (useContext, useEffect, useRef, useState) for component state management and lifecycle.
+ * - AuthContext and ChatContext for accessing the current user's authentication status and chat-related data.
+ * - LocalStorage for retrieving the current user's private key.
+ * - The Web Crypto API for cryptographic operations, including message decryption.
+ * 
+ * * Functions:
+ * - fetchPrivateKey(useruid): Retrieves the current user's private key from localStorage.
+ *   Throws an error if no user is 
+ *   logged in or if the private key is not found.
+ * - decryptWithPrivateKey(privateKeyString, encryptedMessageBase64): Decrypts an encrypted
+ *   message using the user's private 
+ *   key. It handles the decryption process, including converting the Base64-encoded message 
+ *   and key to the format expected 
+ *   by the Web Crypto API, performing the decryption, and then converting the decrypted 
+ *   ArrayBuffer back to a string.
+ * 
+ * * Features:
+ * - Decrypts encrypted messages using the recipient's private key, 
+ *   falling back to the sender's private key if necessary. 
+ *   This allows users to view both sent and received messages.
+ * - Automatically scrolls to the latest message when the component updates.
+ * - Formats and displays the message timestamp in a human-readable format.
+ * - Displays image messages if available, alongside the decrypted text message.
+ * 
+ * 
+ * */
+
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ChatContext } from "../context/ChatContext";
@@ -15,6 +51,7 @@ export function fetchPrivateKey(useruid) {
   return privateKey;
 }
 
+// function to decrypts an encrypted message using the user's private key.
 export async function decryptWithPrivateKey(privateKeyString, encryptedMessageBase64) {
   try {
       // Decode the Base64-encoded encrypted message
@@ -50,14 +87,15 @@ export async function decryptWithPrivateKey(privateKeyString, encryptedMessageBa
 }
 
 const Message = ({ message }) => {
-  const { currentUser } = useContext(AuthContext);
-  const { data } = useContext(ChatContext);
-  const [decryptedMes, setDecryptedMes] = useState("");
+  const { currentUser } = useContext(AuthContext); // Current user data from AuthContext
+  const { data } = useContext(ChatContext); // Active chat data from ChatContext
+  const [decryptedMes, setDecryptedMes] = useState(""); // State to hold the decrypted message
 
-  const ref = useRef();
+  const ref = useRef(); // Ref for the message element for automatic scrolling
   const privateKey = fetchPrivateKey(currentUser.uid);
 
   useEffect(() => {
+    // Asynchronously decrypts the message when the component mounts or when the message changes
     const decryptMessage = async () => {
       try {
         const decryptedMessage = await decryptWithPrivateKey(

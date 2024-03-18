@@ -253,10 +253,10 @@ $white: #ffffff;
 }
 
 .formContainer {
-  background-image: url('img/background.png'); /* 指向图片的路径 */
-  background-size: cover; /* 背景图片覆盖整个容器 */
-  background-repeat: no-repeat; /* 不重复背景图片 */
-  background-position: top center; /* 背景图片居中显示 */
+  background-image: url('img/background.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top center;
   // background-color: #CCEACB;
   height: 100vh;
   display: flex;
@@ -372,10 +372,10 @@ $white: #ffffff;
 
 .home {
   // background-color: #E1F2E8;
-  background-image: url('img/backgroundHome.png'); /* 指向图片的路径 */
-  background-size: cover; /* 背景图片覆盖整个容器 */
-  background-repeat: no-repeat; /* 不重复背景图片 */
-  background-position: top center; /* 背景图片居中显示 */
+  background-image: url('img/backgroundHome.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top center;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -756,16 +756,16 @@ button:hover {
   }
 }
 
-/* 登录界面样式结束 */
+
 .social-login {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px; // 调整这个值来控制间距
+  gap: 10px; 
 }
 .social-buttons {
   display: flex;
-  gap: 10px; // 按钮之间的间隙
+  gap: 10px; 
 }
 
 .social-button {
@@ -779,11 +779,10 @@ button:hover {
   outline: none;
 
   .social-icon {
-    width: 24px; // 控制图标的宽度
-    height: auto; // 自动调整高度以保持比例
+    width: 24px; 
+    height: auto; 
   }
 }
-
 
 .userInfoModal {
   position:absolute;
