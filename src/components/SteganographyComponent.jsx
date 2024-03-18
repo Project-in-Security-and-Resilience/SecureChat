@@ -61,20 +61,37 @@ const SteganographyComponent = () => {
 
   // Function to encode text into the source image
   const hideText = () => {
-    const encodedDataUri = steg.encode(textToHide, sourceImage);
-    setEncodedImage(encodedDataUri);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const encodedDataUri = steg.encode(textToHide, img); // Pass the image object instead of imageData
+      setEncodedImage(encodedDataUri);
+    };
+    img.src = sourceImage;
   }
 
   // Function to decode text from an image
   const decode = (file) => {
     const reader = new FileReader();
-
     reader.onload = (e) => {
-      const decodedMessage = steg.decode(e.target.result);
-      // Set the decoded text
-      setDecodedText(decodedMessage);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const decodedMessage = steg.decode(img); // Pass the image object instead of imageData
+        setDecodedText(decodedMessage);
+      };
+      img.src = e.target.result;
     };
-
     reader.readAsDataURL(file);
   }
   // Function to trigger the download

@@ -42,165 +42,175 @@ import {
   doc,
   serverTimestamp,
   Timestamp,
-  updateDoc,getDoc,
+  updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
 import GptAccInfo from "../ai_helper/GetGptAccInfo.js";
-import {getAIResp} from "../ai_helper/gptCaller.js";
-import { getDownloadURL, ref, uploadBytesResumable, } from "firebase/storage";
+import { getAIResp } from "../ai_helper/gptCaller.js";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import DOMPurify from "dompurify";
-import {fetchPrivateKey} from "./Message";
+import { fetchPrivateKey } from "./Message";
 import { decryptWithPrivateKey } from "./Message";
 
-// Encryption function to securely encrypt messages with a recipient's public key
 async function encryptWithPublicKey(publicKeyString, message) {
   try {
-      // Decode the Base64-encoded public key string
-      const publicKeyBuffer = Uint8Array.from(atob(publicKeyString), c => c.charCodeAt(0));
+    const publicKeyBuffer = Uint8Array.from(
+      atob(publicKeyString),
+      (c) => c.charCodeAt(0)
+    );
 
-      // Import the public key
-      const publicKey = await window.crypto.subtle.importKey(
-          "spki",
-          publicKeyBuffer,
-          {
-              name: "RSA-OAEP",
-              hash: "SHA-256"
-          },
-          true,
-          ["encrypt"]
-      );
+    const publicKey = await window.crypto.subtle.importKey(
+      "spki",
+      publicKeyBuffer,
+      {
+        name: "RSA-OAEP",
+        hash: "SHA-256",
+      },
+      true,
+      ["encrypt"]
+    );
 
-      // Convert the message to ArrayBuffer
-      const messageBuffer = new TextEncoder().encode(message);
+    const messageBuffer = new TextEncoder().encode(message);
 
-      // Encrypt the message using the public key
-      const encryptedMessageBuffer = await window.crypto.subtle.encrypt(
-          {
-              name: "RSA-OAEP"
-          },
-          publicKey,
-          messageBuffer
-      );
+    const encryptedMessageBuffer = await window.crypto.subtle.encrypt(
+      {
+        name: "RSA-OAEP",
+      },
+      publicKey,
+      messageBuffer
+    );
 
-      // Convert the encrypted message to base64
-      const encryptedMessageBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedMessageBuffer)));
+    const encryptedMessageBase64 = btoa(
+      String.fromCharCode(...new Uint8Array(encryptedMessageBuffer))
+    );
 
-      return encryptedMessageBase64;
+    return encryptedMessageBase64;
   } catch (error) {
-      throw error;
+    throw error;
   }
 }
 
 const Input = () => {
-  const [text, setText] = useState(""); // State for managing the text input by the user
-  const [img, setImg] = useState(null); // State for managing the image selected by the user
+  const [text, setText] = useState("");
+  const [img, setImg] = useState(null);
 
-  const { currentUser } = useContext(AuthContext); // Use AuthContext to access the current user's information
-  const { data } = useContext(ChatContext); // Use ChatContext to access chat-related data
+  const { currentUser } = useContext(AuthContext);
+  const { data } = useContext(ChatContext);
+
   const handleSend = async () => {
-    // Check if the message text contains <script> tags
     if (text.includes("<script>")) {
-      alert("Your message has been blocked to protect from XSS attacks."); // Show a popup
-      return; // Exit the function to prevent sending the message
+      alert("Your message has been blocked to protect from XSS attacks.");
+      return;
     }
 
-    // Sanitize message text
     const sanitizedText = DOMPurify.sanitize(text);
 
-    // Check if the sanitized message text is empty
     if (!sanitizedText.trim() && !img) {
-      alert("Please enter a message."); // Show a popup
-      return; // Exit the function if both sanitizedText and img are empty
+      alert("Please enter a message.");
+      return;
     }
     let encryptedText = null;
 
-     // Check if there is a recipient user and fetch their public key from Firestore
-     if (data.user?.uid) {
-
-      // Fetch recipient's public key from Firestore
-      const recipientDoc = await getDoc(doc(db, "users", data.user.uid)); // Use getDoc here
+    if (data.user?.uid && sanitizedText) {
+      const recipientDoc = await getDoc(doc(db, "users", data.user.uid));
       const recipientPublicKey = recipientDoc.data()?.publicKey;
 
-      // Encrypt the message using the recipient's public key
-      encryptedText = await encryptWithPublicKey(recipientPublicKey,sanitizedText);
+      encryptedText = await encryptWithPublicKey(
+        recipientPublicKey,
+        sanitizedText
+      );
 
-      // Fetch recipient's public key from Firestore
-      const senderDoc = await getDoc(doc(db, "users", currentUser.uid)); // Use getDoc here
+      const senderDoc = await getDoc(doc(db, "users", currentUser.uid));
       const senderPublicKey = senderDoc.data()?.publicKey;
 
-      // Encrypt the message using the sender's private key
-      const encryptedForSender = await encryptWithPublicKey(senderPublicKey, sanitizedText);
+      const encryptedForSender = await encryptWithPublicKey(
+        senderPublicKey,
+        sanitizedText
+      );
 
-      // Store both encrypted versions of the message in the database
       encryptedText = { recipient: encryptedText, sender: encryptedForSender };
     }
 
-    // Handle image uploads separately
     if (img) {
       const storageRef = ref(storage, uuid());
 
       const uploadTask = uploadBytesResumable(storageRef, img);
 
-      
-      uploadTask.on(
-        (error) => {
-          //TODO:Handle Error
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            await updateDoc(doc(db, "chats", data.chatId), {
-              messages: arrayUnion({
-                id: uuid(),
-                encryptedText,
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-                img: downloadURL,
-              }),
-            });
-          });
-        }
-      );
-    } else {
-        await updateDoc(doc(db, "chats", data.chatId), {
-            messages: arrayUnion({
-                id: uuid(),
-                encryptedText,
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-            }),
+      try {
+        const snapshot = await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {},
+            (error) => reject(error),
+            () => resolve(uploadTask.snapshot)
+          );
         });
 
-      const gptInfo = await GptAccInfo();
-      // If receiver is the gpt account, call gpt api automatically and not support to operate pic
-      if (data.user.uid === gptInfo.uid && img===null){
-          const privateKey = fetchPrivateKey(currentUser.uid);
-          const decryptedMessage = await decryptWithPrivateKey(
-              privateKey,
-              encryptedText.sender
-          );
-          const combinedId =
-              currentUser.uid > gptInfo.uid
-                  ? gptInfo.uid + currentUser.uid
-                  : currentUser.uid + gptInfo.uid ;
-          const reply = await getAIResp(decryptedMessage);
+        const downloadURL = await getDownloadURL(snapshot.ref);
 
-          // Fetch recipient's public key from Firestore
-          const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
-          const gptPublicKey = gptDoc.data()?.publicKey;
-          const encryptedForSender = await encryptWithPublicKey(gptPublicKey, reply)
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          const userPublicKey = userDoc.data()?.publicKey;
-          const encryptedForReceiver = await encryptWithPublicKey(userPublicKey,reply)
-          const gptEncryptedText = { recipient: encryptedForReceiver, sender: encryptedForSender };
-          await updateDoc(doc(db, "chats", data.chatId), {
-              messages: arrayUnion({
-                  id: uuid(),
-                  encryptedText: gptEncryptedText,
-                  senderId: gptInfo.uid,
-                  date: Timestamp.now(),
-              }),
-          });
+        await updateDoc(doc(db, "chats", data.chatId), {
+          messages: arrayUnion({
+            id: uuid(),
+            encryptedText,
+            senderId: currentUser.uid,
+            date: Timestamp.now(),
+            img: downloadURL,
+          }),
+        });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        // Handle error
+      }
+    } else {
+      await updateDoc(doc(db, "chats", data.chatId), {
+        messages: arrayUnion({
+          id: uuid(),
+          encryptedText,
+          senderId: currentUser.uid,
+          date: Timestamp.now(),
+        }),
+      });
+
+      const gptInfo = await GptAccInfo();
+
+      if (data.user.uid === gptInfo.uid && img === null) {
+        const privateKey = fetchPrivateKey(currentUser.uid);
+        const decryptedMessage = await decryptWithPrivateKey(
+          privateKey,
+          encryptedText.sender
+        );
+        const combinedId =
+          currentUser.uid > gptInfo.uid
+            ? gptInfo.uid + currentUser.uid
+            : currentUser.uid + gptInfo.uid;
+        const reply = await getAIResp(decryptedMessage);
+
+        const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
+        const gptPublicKey = gptDoc.data()?.publicKey;
+        const encryptedForSender = await encryptWithPublicKey(
+          gptPublicKey,
+          reply
+        );
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        const userPublicKey = userDoc.data()?.publicKey;
+        const encryptedForReceiver = await encryptWithPublicKey(
+          userPublicKey,
+          reply
+        );
+        const gptEncryptedText = {
+          recipient: encryptedForReceiver,
+          sender: encryptedForSender,
+        };
+        await updateDoc(doc(db, "chats", data.chatId), {
+          messages: arrayUnion({
+            id: uuid(),
+            encryptedText: gptEncryptedText,
+            senderId: gptInfo.uid,
+            date: Timestamp.now(),
+          }),
+        });
       }
     }
 
