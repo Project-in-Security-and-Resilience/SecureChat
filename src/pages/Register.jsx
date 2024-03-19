@@ -85,9 +85,6 @@ const Register = () => {
 
        // Send verification email
       await sendEmailVerification(res.user)
-      .then(() => {
-        alert("Verification email sent. Please check your inbox.");
-      })
       .catch((error) => {
         console.error("Error sending email verification", error);
       });

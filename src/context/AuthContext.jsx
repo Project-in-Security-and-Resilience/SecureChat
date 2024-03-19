@@ -62,11 +62,25 @@ export const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState({});
+  const [showNotification, setShowNotification] = useState(false); // State to control the notification visibility
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
+        if (!user.emailVerified) {
+          // If email is not verified, set showNotification to true
+          setShowNotification(true);
+          // If email is not verified, sign out the user
+          signOut(auth).then(() => {
+            setCurrentUser(null);
+          }).catch((error) => {
+            console.log(error.message);
+          });
+          window.alert("Please verify your email.")
+        } else {
+          setShowNotification(false); // Reset notification when email is verified
         // Check if user's public key exists in Firestore
         const userRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(userRef);
@@ -79,6 +93,9 @@ export const AuthContextProvider = ({ children }) => {
           localStorage.setItem(`${user.uid}_privateKey`, privateKey);
         }
       }
+    }else {
+      setCurrentUser(null); // Reset currentUser if user is not authenticated
+    }
     });
 
     return () => unsubscribe();
