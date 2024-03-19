@@ -130,33 +130,49 @@
      const date = new Date(milliseconds);
      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
    };
- 
+
+
    return (
-    
-     <div
-       ref={ref}
-       className={`message ${message.senderId === currentUser.uid && "owner"}`}
-     >
-       <div className="messageInfo">
-         <img
-           src={
-             message.senderId === currentUser.uid
-               ? currentUser.photoURL
-               : data.user.photoURL
-           }
-           alt=""
-         />
-         <span className="timestamp">{formatTimestamp(message.date)}</span>
-         
+
+       <div
+           ref={ref}
+           className={`message ${message.senderId === currentUser.uid && "owner"}`}
+       >
+         <div className="messageInfo">
+           <img
+               src={
+                 message.senderId === currentUser.uid
+                     ? currentUser.photoURL
+                     : data.user.photoURL
+               }
+               alt=""
+           />
+           <span className="timestamp">{formatTimestamp(message.date)}</span>
+
+         </div>
+         <div className="messageContent">
+           {message.disappear && <span className="expiry">Expires in 5 mins</span>}
+           <p>
+               {decryptedMes}
+             {/* If there is an image, it displays a clickable downloadable image */}
+             {message.img && (
+                 // Wrap the image with a link
+                 <a href={message.img} download="downloaded_image.jpg" target="_blank">
+                   <img src={message.img} alt="This is pdf file, Click to download" />
+                 </a>
+             )}
+             {/* If a PDF file is available, a link to download the PDF is displayed */}
+             {message.pdf && (
+                 <a href={message.pdf} download={`${message.senderId}_document.pdf`} target="_blank">
+                   Download PDF
+                 </a>
+             )}
+           </p>
+
+         </div>
        </div>
-       <div className="messageContent">
-       {message.disappear && <span className="expiry">Expires in 5 mins</span>}
-         <p>{decryptedMes}</p>
-         {message.img && <img src={message.img} alt="" />}
-       </div>
-     </div>
    );
  };
- 
- export default Message;
+
+export default Message;
  

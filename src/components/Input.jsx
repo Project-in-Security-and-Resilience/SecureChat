@@ -95,6 +95,7 @@ async function encryptWithPublicKey(publicKeyString, message) {
 const Input = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
+  const [pdf, setPdf] = useState(null); // 新增状态用于存储 PDF 文件
   const [timeSend, setTimeSend] = useState(false); // Toggle state for time-send
   const [buttonColor, setButtonColor] = useState("#cccccc");
 
@@ -221,6 +222,39 @@ const Input = () => {
         });
       }
     }
+    if (pdf) {
+      // 处理 PDF 文件上传的逻辑...
+      const storageRef = ref(storage, uuid());
+      const uploadTask = uploadBytesResumable(storageRef, pdf);
+
+      try {
+        const snapshot = await new Promise((resolve, reject) => {
+          uploadTask.on(
+              "state_changed",
+              (snapshot) => {},
+              (error) => reject(error),
+              () => resolve(uploadTask.snapshot)
+          );
+        });
+
+        const downloadURL = await getDownloadURL(snapshot.ref);
+
+        // 更新 Firestore 文档以包含上传的 PDF 文件信息
+        await updateDoc(doc(db, "chats", data.chatId), {
+          messages: arrayUnion({
+            id: uuid(),
+            encryptedText,
+            disappear,
+            senderId: currentUser.uid,
+            date: Timestamp.now(),
+            pdf: downloadURL, // 添加 PDF 文件的下载链接
+          }),
+        });
+      } catch (error) {
+        console.error("Error uploading PDF:", error);
+      }
+    }
+
     if (!disappear) {
     await updateDoc(doc(db, "userChats", currentUser.uid), {
       [data.chatId + ".lastMessage"]: {
@@ -241,6 +275,7 @@ const Input = () => {
     // Reset text and img state
     setText("");
     setImg(null);
+    setPdf(null);
   };
 
   const toggleTimeSend = () => {
@@ -262,15 +297,26 @@ const Input = () => {
       />
       <div className="send">
         <input
-          type="file"
-          style={{ display: "none" }}
-          id="file"
-          onChange={(e) => setImg(e.target.files[0])}
+            type="file"
+            style={{display: "none"}}
+            id="file"
+            onChange={(e) => setImg(e.target.files[0])}
         />
         <label htmlFor="file">
-          <img src={Img} alt="" />
+          <img src={Img} alt=""/>
         </label>
-        <button onClick={toggleTimeSend} style={{ backgroundColor: buttonColor }}>
+        <input
+            type="file"
+            style={{display: "none"}}
+            id="file"
+            accept=".pdf" // PDF file limitation
+            onChange={(e) => setPdf(e.target.files[0])} // update PDF file state
+        />
+        <label htmlFor="file">
+          <img src={Attach} alt=""/> {/* Use a new icon to indicate uploading a PDF */}
+        </label>
+
+        <button onClick={toggleTimeSend} style={{backgroundColor: buttonColor}}>
           {timeSend ? 'Disable Expiry' : 'Enable Expiry'}
         </button>
         <button onClick={handleSend}>Send</button>
