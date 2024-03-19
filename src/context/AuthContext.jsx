@@ -29,6 +29,31 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
+export async function resetKeys(uid) {
+  try {
+    // Delete old keys from Firestore
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, { publicKey: null }, { merge: true });
+
+    // Delete old private key from local storage
+    localStorage.removeItem(`${uid}_privateKey`);
+
+    // Generate new keys
+    const { publicKey, privateKey } = await generateKeyPair();
+
+    // Store new public key in Firestore
+    await setDoc(userRef, { publicKey }, { merge: true });
+
+    // Store new private key securely in browser local storage
+    localStorage.setItem(`${uid}_privateKey`, privateKey);
+
+    return { publicKey, privateKey };
+  } catch (error) {
+    console.error("Error resetting keys:", error);
+    throw error;
+  }
+}
+
 // Function to generate RSA key pair using Web Crypto API
 export async function generateKeyPair() {
   try {

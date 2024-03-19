@@ -29,7 +29,7 @@
  */
 // import all the neccessary components
 import React, { useContext, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext,resetKeys } from "../context/AuthContext";
 import { fetchPrivateKey } from "./Message";
 
 const ShowPrivateKey = () => {
@@ -56,6 +56,21 @@ const ShowPrivateKey = () => {
     setPrivateKey(null);
   };
 
+  // Inside ShowPrivateKey component
+const handleResetKeys = async () => {
+  const confirmation = window.confirm("Resetting your keys will make old messages unreadable. Are you sure you want to proceed?");
+  if (confirmation) {
+    try {
+      const { publicKey, privateKey } = await resetKeys(currentUser.uid);
+      setPrivateKey(privateKey);
+      setError(null);
+      alert("Keys reset successfully!");
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+};
+
   // Function to copy the displayed private key to the clipboard
   const handleCopyPrivateKey = () => {
     navigator.clipboard.writeText(privateKey);
@@ -64,7 +79,9 @@ const ShowPrivateKey = () => {
 
   return (
     <div className="showPrivateKeyContainer">
+
       <button onClick={handleShowPrivateKey}>Reveal E2E Private Key</button> {/* Button to trigger the display of the private key */}
+      <button onClick={handleResetKeys}>Reset E2E Keys</button>
       {showModal && (
         <div className="modal">
           <div className="modalContent">
