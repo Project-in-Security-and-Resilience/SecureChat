@@ -37,7 +37,13 @@
  import React, { useContext, useEffect, useRef, useState } from "react";
  import { AuthContext } from "../context/AuthContext";
  import { ChatContext } from "../context/ChatContext";
- 
+ import {
+  doc,
+  getDoc,
+} from "firebase/firestore";
+import GptAccInfo from "../ai_helper/GetGptAccInfo.js";
+import { db } from "../firebase";
+
  // Function to fetch the current user's private key from local storage
  export function fetchPrivateKey(useruid) {
    if (!useruid) {
@@ -85,37 +91,127 @@
      throw error;
    }
  }
+
+// Function to fetch the sender's public key from Firebase
+async function fetchSenderPublicKey(senderId) {
+  try {
+    const senderDoc = await getDoc(doc(db, "users", senderId));
+    return senderDoc.data()?.publicKey;
+  } catch (error) {
+    console.error("Error fetching sender's public key:", error);
+    throw error;
+  }
+}
+
+// Function to verify the digital signature using the sender's public key
+async function verifySignature(publicKeyString, message, signature) {
+  try {
+    const encryptedSignBuffer = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
+
+    const publicKeyBuffer = Uint8Array.from(
+      atob(publicKeyString),
+      c => c.charCodeAt(0)
+    );
+
+    const publicKey = await window.crypto.subtle.importKey(
+      "spki",
+      publicKeyBuffer,
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: {
+          name: "SHA-256"
+        },
+        modulusLength: 2048,
+        extractable: false,
+        publicExponent: new Uint8Array([1, 0, 1])
+      },
+      true,
+      ["verify"]
+    );
+
+    const messageBuffer = new TextEncoder().encode(message);
+    const result = await window.crypto.subtle.verify(
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: {
+          name: "SHA-256"
+        },
+        modulusLength: 2048,
+        extractable: false,
+        publicExponent: new Uint8Array([1, 0, 1])
+      },
+      publicKey,
+      encryptedSignBuffer,
+      messageBuffer
+    );
+
+    return result;
+  } catch (error) {
+    console.log(error)
+    throw error;
+  }
+}
  
  const Message = ({ message }) => {
    const { currentUser } = useContext(AuthContext); // Current user data from AuthContext
    const { data } = useContext(ChatContext); // Active chat data from ChatContext
    const [decryptedMes, setDecryptedMes] = useState(""); // State to hold the decrypted message
+  const [senderPublicKey, setSenderPublicKey] = useState(""); // State to hold the sender's public key
+
  
    const ref = useRef(); // Ref for the message element for automatic scrolling
    const privateKey = fetchPrivateKey(currentUser.uid);
  
    useEffect(() => {
-     // Asynchronously decrypts the message when the component mounts or when the message changes
-     const decryptMessage = async () => {
-       try {
-         const decryptedMessage = await decryptWithPrivateKey(
-           privateKey,
-           message.encryptedText.recipient
-         );
-         setDecryptedMes(decryptedMessage);
-       } catch (error) {
-         try {
-           const decryptedMessage = await decryptWithPrivateKey(
-             privateKey,
-             message.encryptedText.sender
-           );
-           setDecryptedMes(decryptedMessage);
-         } catch (error) {}
-       }
-     };
- 
-     decryptMessage();
-   }, [message, privateKey]);
+    const fetchSenderPublicKeyAndDecrypt = async () => {
+      try {
+        const gptInfo = await GptAccInfo();
+        if(message.senderId!=currentUser.uid && message.senderId!=gptInfo.uid){
+          const publicKey = await fetchSenderPublicKey(message.senderId);
+        setSenderPublicKey(publicKey);
+        const isSignatureValid = await verifySignature(
+          publicKey,
+          message.encryptedText.recipient,
+          message.signature
+        );
+        
+        if (isSignatureValid) {
+          // Decrypt and display the message
+          const decryptedMessage = await decryptWithPrivateKey(
+            privateKey,
+            message.encryptedText.recipient
+          );
+          setDecryptedMes(decryptedMessage);
+        } else {
+          console.error("Invalid digital signature. Message integrity compromised.");
+        }
+      }else if (message.senderId==currentUser.uid){
+        const isSignatureValid=true;
+          // Decrypt and display the message
+          const decryptedMessage = await decryptWithPrivateKey(
+            privateKey,
+            message.encryptedText.sender
+          );
+          setDecryptedMes(decryptedMessage);
+        
+      }else if (message.senderId==gptInfo.uid){
+        const isSignatureValid=true;
+          // Decrypt and display the message
+          const decryptedMessage = await decryptWithPrivateKey(
+            privateKey,
+            message.encryptedText.recipient
+          );
+          console.log(decryptedMessage)
+          setDecryptedMes(decryptedMessage);
+        
+      }
+      } catch (error) {
+        console.error("Error fetching sender's public key or decrypting message:", error);
+      }
+    };
+
+    fetchSenderPublicKeyAndDecrypt();
+  }, [message, privateKey]);
  
    useEffect(() => {
      ref.current?.scrollIntoView({ behavior: "smooth" });

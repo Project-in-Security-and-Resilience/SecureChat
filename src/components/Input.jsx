@@ -54,6 +54,7 @@ import DOMPurify from "dompurify";
 import { fetchPrivateKey } from "./Message";
 import { decryptWithPrivateKey } from "./Message";
 
+
 async function encryptWithPublicKey(publicKeyString, message) {
   try {
     const publicKeyBuffer = Uint8Array.from(
@@ -101,6 +102,51 @@ const Input = () => {
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
 
+  // Function to sign a message using the sender's private key
+async function signMessage(privateKeyString, message) {
+  try {
+    // Decode the Base64-encoded private key string
+    const privateKeyBuffer = Uint8Array.from(atob(privateKeyString), c => c.charCodeAt(0));
+    // Import the private key
+    const privateKey = await window.crypto.subtle.importKey(
+      "pkcs8",
+      privateKeyBuffer,
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: {
+          name: "SHA-256"
+        },
+        modulusLength: 2048,
+        extractable: false,
+        publicExponent: new Uint8Array([1, 0, 1])
+      },
+      true,
+      ["sign"]
+    );
+    const messageBuffer = new TextEncoder().encode(message);
+    const signature = await window.crypto.subtle.sign(
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        hash: {
+          name: "SHA-256"
+        },
+        modulusLength: 2048,
+        extractable: false,
+        publicExponent: new Uint8Array([1, 0, 1])
+      },
+      privateKey,
+      messageBuffer
+    );
+    const signBase64 = btoa(
+      String.fromCharCode(...new Uint8Array(signature))
+    );
+    return signBase64;
+  } catch (error) {
+    console.log(error)
+    throw error;
+  }
+}
+
   const handleSend = async () => {
     // Set disappear to true for time-send messages
     const disappear = timeSend ? true : false;
@@ -116,7 +162,13 @@ const Input = () => {
       alert("Please enter a message.");
       return;
     }
+
+    // Sign the message using the sender's private key
+    const privateKey = fetchPrivateKey(currentUser.uid);
+    
+    
     let encryptedText = null;
+    let signature = null;
 
     if (data.user?.uid && sanitizedText) {
       const recipientDoc = await getDoc(doc(db, "users", data.user.uid));
@@ -126,7 +178,7 @@ const Input = () => {
         recipientPublicKey,
         sanitizedText
       );
-
+      signature = await signMessage(privateKey, encryptedText);
       const senderDoc = await getDoc(doc(db, "users", currentUser.uid));
       const senderPublicKey = senderDoc.data()?.publicKey;
 
@@ -159,6 +211,7 @@ const Input = () => {
           messages: arrayUnion({
             id: uuid(),
             encryptedText,
+            signature,
             disappear,
             senderId: currentUser.uid,
             date: Timestamp.now(),
@@ -174,6 +227,7 @@ const Input = () => {
         messages: arrayUnion({
           id: uuid(),
           encryptedText,
+          signature,
           disappear,
           senderId: currentUser.uid,
           date: Timestamp.now(),
@@ -181,7 +235,6 @@ const Input = () => {
       });
 
       const gptInfo = await GptAccInfo();
-
       if (data.user.uid === gptInfo.uid && img === null) {
         const privateKey = fetchPrivateKey(currentUser.uid);
         const decryptedMessage = await decryptWithPrivateKey(
