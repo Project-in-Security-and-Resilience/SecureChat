@@ -1,3 +1,37 @@
+/**
+ * *Input Component:
+ * This component is designed to handle user inputs for sending messages within a chat application.
+ * It supports text messages and image uploads. The component also integrates with Firebase Firestore
+ * for message storage and Firebase Storage for image uploads. Additionally, it includes message encryption
+ * functionality to ensure privacy, confidenciality, and security of the communication.
+ * 
+ * * Features:
+ * - Text input for composing messages.
+ * - Button to attach and send images.
+ * - Integration with Firebase Firestore to store messages and chat details.
+ * - Integration with Firebase Storage for storing and retrieving image messages.
+ * - RSA encryption of messages using public keys of the sender and recipient for secure communication.
+ * - Automatic replies from an AI (GPT) assistant when messaging the AI account.
+ * 
+ * * Encryption:
+ * Messages are encrypted using RSA-OAEP with SHA-256 hashing. Each message is encrypted twice:
+ * once with the recipient's public key (for their eyes only) and once with the sender's public key
+ * (so they can see what they sent) before being stored in Firestore.
+ * 
+ * * Sanitization:
+ * Uses DOMPurify to sanitize the input text to protect against XSS attacks.
+ * 
+ * * State:
+ * - text (string): The current text input by the user.
+ * - img (File | null): The current image selected for upload.
+ * 
+ * * Functions:
+ * - handleSend: Sanitizes the input text, encrypts the message, handles image uploads, 
+ *   and updates Firestore documents with the new message.
+ * - encryptWithPublicKey: Encrypts text messages with a given public key.
+ * 
+ * */
+
 import React, { useContext, useState } from "react";
 import Img from "../img/img.png";
 import Attach from "../img/attach.png";
@@ -8,102 +42,100 @@ import {
   doc,
   serverTimestamp,
   Timestamp,
-  updateDoc,getDoc,
+  updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
 import { v4 as uuid } from "uuid";
 import GptAccInfo from "../ai_helper/GetGptAccInfo.js";
-import {getAIResp} from "../ai_helper/gptCaller.js";
-import { getDownloadURL, ref, uploadBytesResumable, } from "firebase/storage";
+import { getAIResp } from "../ai_helper/gptCaller.js";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import DOMPurify from "dompurify";
-import {fetchPrivateKey} from "./Message";
+import { fetchPrivateKey } from "./Message";
 import { decryptWithPrivateKey } from "./Message";
 
 async function encryptWithPublicKey(publicKeyString, message) {
   try {
-      // Decode the Base64-encoded public key string
-      const publicKeyBuffer = Uint8Array.from(atob(publicKeyString), c => c.charCodeAt(0));
+    const publicKeyBuffer = Uint8Array.from(
+      atob(publicKeyString),
+      (c) => c.charCodeAt(0)
+    );
 
-      // Import the public key
-      const publicKey = await window.crypto.subtle.importKey(
-          "spki",
-          publicKeyBuffer,
-          {
-              name: "RSA-OAEP",
-              hash: "SHA-256"
-          },
-          true,
-          ["encrypt"]
-      );
+    const publicKey = await window.crypto.subtle.importKey(
+      "spki",
+      publicKeyBuffer,
+      {
+        name: "RSA-OAEP",
+        hash: "SHA-256",
+      },
+      true,
+      ["encrypt"]
+    );
 
-      // Convert the message to ArrayBuffer
-      const messageBuffer = new TextEncoder().encode(message);
+    const messageBuffer = new TextEncoder().encode(message);
 
-      // Encrypt the message using the public key
-      const encryptedMessageBuffer = await window.crypto.subtle.encrypt(
-          {
-              name: "RSA-OAEP"
-          },
-          publicKey,
-          messageBuffer
-      );
+    const encryptedMessageBuffer = await window.crypto.subtle.encrypt(
+      {
+        name: "RSA-OAEP",
+      },
+      publicKey,
+      messageBuffer
+    );
 
-      // Convert the encrypted message to base64
-      const encryptedMessageBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedMessageBuffer)));
+    const encryptedMessageBase64 = btoa(
+      String.fromCharCode(...new Uint8Array(encryptedMessageBuffer))
+    );
 
-      return encryptedMessageBase64;
+    return encryptedMessageBase64;
   } catch (error) {
-      console.error("Error encrypting message:", error);
-      throw error;
+    throw error;
   }
 }
 
 const Input = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
+  const [timeSend, setTimeSend] = useState(false); // Toggle state for time-send
+  const [buttonColor, setButtonColor] = useState("#cccccc");
 
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
-    // Check if the message text contains <script> tags
+    // Set disappear to true for time-send messages
+    const disappear = timeSend ? true : false;
+
     if (text.includes("<script>")) {
-      alert("Your message has been blocked to protect from XSS attacks."); // Show a popup
-      return; // Exit the function to prevent sending the message
+      alert("Your message has been blocked to protect from XSS attacks.");
+      return;
     }
 
-    // Sanitize message text
     const sanitizedText = DOMPurify.sanitize(text);
 
-    // Check if the sanitized message text is empty
     if (!sanitizedText.trim() && !img) {
-      alert("Please enter a message."); // Show a popup
-      return; // Exit the function if both sanitizedText and img are empty
+      alert("Please enter a message.");
+      return;
     }
     let encryptedText = null;
 
-     // Check if there is a recipient user and fetch their public key from Firestore
-     if (data.user?.uid) {
-
-      // Fetch recipient's public key from Firestore
-      const recipientDoc = await getDoc(doc(db, "users", data.user.uid)); // Use getDoc here
+    if (data.user?.uid && sanitizedText) {
+      const recipientDoc = await getDoc(doc(db, "users", data.user.uid));
       const recipientPublicKey = recipientDoc.data()?.publicKey;
-      console.log(recipientPublicKey)
 
-      // Encrypt the message using the recipient's public key
-      encryptedText = await encryptWithPublicKey(recipientPublicKey,sanitizedText);
-      console.log("enc text",encryptedText)
+      encryptedText = await encryptWithPublicKey(
+        recipientPublicKey,
+        sanitizedText
+      );
 
-      // Fetch recipient's public key from Firestore
-      const senderDoc = await getDoc(doc(db, "users", currentUser.uid)); // Use getDoc here
+      const senderDoc = await getDoc(doc(db, "users", currentUser.uid));
       const senderPublicKey = senderDoc.data()?.publicKey;
 
-      // Encrypt the message using the sender's private key
-      const encryptedForSender = await encryptWithPublicKey(senderPublicKey, sanitizedText);
+      const encryptedForSender = await encryptWithPublicKey(
+        senderPublicKey,
+        sanitizedText
+      );
 
-      // Store both encrypted versions of the message in the database
       encryptedText = { recipient: encryptedText, sender: encryptedForSender };
-      console.log("???",encryptedText)
     }
 
     if (img) {
@@ -111,75 +143,89 @@ const Input = () => {
 
       const uploadTask = uploadBytesResumable(storageRef, img);
 
-      uploadTask.on(
-        (error) => {
-          //TODO:Handle Error
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            await updateDoc(doc(db, "chats", data.chatId), {
-              messages: arrayUnion({
-                id: uuid(),
-                encryptedText,
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-                img: downloadURL,
-              }),
-            });
-          });
-        }
-      );
-    } else {
-        await updateDoc(doc(db, "chats", data.chatId), {
-            messages: arrayUnion({
-                id: uuid(),
-                encryptedText,
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-            }),
+      try {
+        const snapshot = await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {},
+            (error) => reject(error),
+            () => resolve(uploadTask.snapshot)
+          );
         });
 
-      const gptInfo = await GptAccInfo();
-      // If receiver is the gpt account, call gpt api automatically and not support to operate pic
-      if (data.user.uid === gptInfo.uid && img===null){
-          const privateKey = fetchPrivateKey(currentUser.uid);
-          const decryptedMessage = await decryptWithPrivateKey(
-              privateKey,
-              encryptedText.sender
-          );
-          console.log("dataChatId",data.chatId)
-          const combinedId =
-              currentUser.uid > gptInfo.uid
-                  ? gptInfo.uid + currentUser.uid
-                  : currentUser.uid + gptInfo.uid ;
-          console.log("combinedId",combinedId)
-          console.log("decrypt",decryptedMessage);
-          const reply = await getAIResp(decryptedMessage);
-          console.log("reply",reply)
+        const downloadURL = await getDownloadURL(snapshot.ref);
 
-          // Fetch recipient's public key from Firestore
-          const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
-          const gptPublicKey = gptDoc.data()?.publicKey;
-          const encryptedForSender = await encryptWithPublicKey(gptPublicKey, reply)
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          const userPublicKey = userDoc.data()?.publicKey;
-          const encryptedForReceiver = await encryptWithPublicKey(userPublicKey,reply)
-          const gptEncryptedText = { recipient: encryptedForReceiver, sender: encryptedForSender };
-          console.log("gptId",gptInfo.uid)
-          await updateDoc(doc(db, "chats", data.chatId), {
-              messages: arrayUnion({
-                  id: uuid(),
-                  encryptedText: gptEncryptedText,
-                  senderId: gptInfo.uid,
-                  date: Timestamp.now(),
-              }),
-          });
+        await updateDoc(doc(db, "chats", data.chatId), {
+          messages: arrayUnion({
+            id: uuid(),
+            encryptedText,
+            disappear,
+            senderId: currentUser.uid,
+            date: Timestamp.now(),
+            img: downloadURL,
+          }),
+        });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        // Handle error
+      }
+    } else {
+      await updateDoc(doc(db, "chats", data.chatId), {
+        messages: arrayUnion({
+          id: uuid(),
+          encryptedText,
+          disappear,
+          senderId: currentUser.uid,
+          date: Timestamp.now(),
+        }),
+      });
+
+      const gptInfo = await GptAccInfo();
+
+      if (data.user.uid === gptInfo.uid && img === null) {
+        const privateKey = fetchPrivateKey(currentUser.uid);
+        const decryptedMessage = await decryptWithPrivateKey(
+          privateKey,
+          encryptedText.sender
+        );
+        const combinedId =
+          currentUser.uid > gptInfo.uid
+            ? gptInfo.uid + currentUser.uid
+            : currentUser.uid + gptInfo.uid;
+        const reply = await getAIResp(decryptedMessage);
+
+        const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
+        const gptPublicKey = gptDoc.data()?.publicKey;
+        const encryptedForSender = await encryptWithPublicKey(
+          gptPublicKey,
+          reply
+        );
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        const userPublicKey = userDoc.data()?.publicKey;
+        const encryptedForReceiver = await encryptWithPublicKey(
+          userPublicKey,
+          reply
+        );
+        const gptEncryptedText = {
+          recipient: encryptedForReceiver,
+          sender: encryptedForSender,
+        };
+        await updateDoc(doc(db, "chats", data.chatId), {
+          messages: arrayUnion({
+            id: uuid(),
+            encryptedText: gptEncryptedText,
+            disappear,
+            senderId: gptInfo.uid,
+            date: Timestamp.now(),
+          }),
+        });
       }
     }
-
+    if (!disappear) {
     await updateDoc(doc(db, "userChats", currentUser.uid), {
       [data.chatId + ".lastMessage"]: {
         encryptedText,
+        disappear,
       },
       [data.chatId + ".date"]: serverTimestamp(),
     });
@@ -187,14 +233,25 @@ const Input = () => {
     await updateDoc(doc(db, "userChats", data.user.uid), {
       [data.chatId + ".lastMessage"]: {
         encryptedText,
+        disappear,
       },
       [data.chatId + ".date"]: serverTimestamp(),
     });
-
+  }
     // Reset text and img state
     setText("");
     setImg(null);
   };
+
+  const toggleTimeSend = () => {
+    setTimeSend(prevTimeSend => !prevTimeSend);
+    if (!timeSend) {
+      setButtonColor("#FF0000"); // Gray color when timeSend is enabled
+    } else {
+      setButtonColor("#488C7A"); // Green color when timeSend is disabled
+    }
+  };
+
   return (
     <div className="input">
       <input
@@ -204,7 +261,6 @@ const Input = () => {
         value={text}
       />
       <div className="send">
-        <img src={Attach} alt="" />
         <input
           type="file"
           style={{ display: "none" }}
@@ -214,6 +270,9 @@ const Input = () => {
         <label htmlFor="file">
           <img src={Img} alt="" />
         </label>
+        <button onClick={toggleTimeSend} style={{ backgroundColor: buttonColor }}>
+          {timeSend ? 'Disable Expiry' : 'Enable Expiry'}
+        </button>
         <button onClick={handleSend}>Send</button>
       </div>
     </div>

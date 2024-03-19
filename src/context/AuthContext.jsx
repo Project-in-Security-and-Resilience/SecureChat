@@ -1,3 +1,29 @@
+/**
+ ** AuthContextProvider:
+ * The AuthContextProvider component manages the authentication state across the application
+ *  using Firebase Authentication. It monitors user sign-in states, handles sign-out, and manages RSA key pairs for encryption. The component also includes functions for generating RSA key pairs and decrypting messages using the Web Crypto API, enhancing security for user communications.
+ * 
+ ** Dependencies:
+ * - React (useState, useEffect, createContext) for state management and context creation.
+ * - Firebase/auth for authentication functionalities.
+ * - Firebase/firestore for storing and retrieving user data, specifically RSA public keys.
+ * - Web Crypto API for cryptographic operations, including RSA key pair generation and message decryption.
+ * 
+ * State:
+ * - currentUser: Holds the currently authenticated user's information.
+ * 
+ * Functions:
+ * - generateKeyPair(): Generates an RSA key pair using the Web Crypto API, returning the keys 
+ *   in Base64 encoded strings.
+ * - decryptMessage(encryptedMessage, key, iv): Decrypts an encrypted message with AES-GCM using
+ *  the provided key and initialization vector (IV).
+ * 
+
+ */
+
+
+
+
 import { createContext, useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -17,6 +43,7 @@ export async function generateKeyPair() {
       ["encrypt", "decrypt"]
     );
 
+    // Exporting keys to SPKI (public key) and PKCS#8 (private key) formats
     const publicKey = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
     const privateKey = await window.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
@@ -29,27 +56,6 @@ export async function generateKeyPair() {
     console.error("Error generating RSA key pair:", error);
     throw error;
   }
-}
-
-
-
-// Function to decrypt an encrypted message using a provided encryption key and IV
-async function decryptMessage(encryptedMessage, key, iv) {
-  // Decrypt the encrypted message using the provided encryption key and IV
-  const decryptedData = await window.crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: iv,
-    },
-    key,
-    encryptedMessage
-  );
-
-  // Convert the decrypted ArrayBuffer to a string
-  const decryptedMessage = new TextDecoder().decode(decryptedData);
-
-  // Return the decrypted message
-  return decryptedMessage;
 }
 
 export const AuthContext = createContext();

@@ -16,12 +16,53 @@
   }
 }
 
+@import url('https://fonts.googleapis.com/css?family=Lato:400,700');
+
+$font: 'Lato', sans-serif;
+
+$primary: #488C7A;
+$secondary: #262626 ;
+$accent: #69cdc1 ;
+$bg: #f2f2f2 ;
+$black: #333333  ;
+$white: #ffffff;
+
+
 .steganographyModal {
   position: relative;
-  background-color: #127dbb; 
+  background-color: #262626; 
   padding: 20px; 
   border-radius: 8px; 
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .downloadButton {
+    background-color: #488C7A; 
+    color: #fff; 
+
+    &:hover {
+      background-color: darken(#488C7A, 10%);
+    }
+  }
+
+  .encodeSection {
+    padding-bottom: 20px; // Add some padding at the bottom
+    border-bottom: 1px solid #444; // Add bottom border
+    .title {
+      color:  white;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  }
+
+  .decodeSection {
+    margin-top: 20px; // Add margin-top to separate from the encode section
+    .title {
+      color:  white;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+  }
 }
 
 .imageContainer {
@@ -30,7 +71,7 @@
   align-items: center;
   margin-top: 20px; 
 
-  .img-cont { // Container for both images
+  .img-cont { 
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -42,13 +83,7 @@
       flex-direction: column;
       align-items: center;
 
-      img.sourcePic { 
-        max-width: 80%;
-        max-height: 80px; 
-        object-fit: contain;
-        margin-bottom: 10px; 
-      }
-
+      img.sourcePic, 
       img.encodedPic { 
         max-width: 80%;
         max-height: 80px; 
@@ -64,14 +99,12 @@
   font-size: 0.75rem; 
   margin: 10px 0; 
   border: 1px solid transparent; 
-  background-color: #0b4d71; 
-  color: #fff; 
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: inline-flex; // 
-  align-items: center; // 
+  display: inline-flex; 
+  align-items: center; 
   justify-content: center; 
   flex-shrink: 0; 
   min-width: 100px; 
@@ -79,34 +112,9 @@
   border-radius: 10px;
 
   &:hover {
-    background-color: darken(#06ac1c, 10%);
-  }
-
-
-  // Adjust button size on smaller screens if necessary
-  @media (max-width: 768px) {
-    padding: 2px 6px;
-    font-size: 0.7rem;
+    background-color: darken(#488C7A, 10%);
   }
 }
-
-
-
-.encodedText {
-  color: #ffffff; }
-
-.sourcePic{
-  color: #ffffff;
-
-}
-
-.decodedText {
-  color: #ffffff; }
-
-.encodedPic{
-  color: #ffffff;
-}
-
 
 .modalBackdrop {
   position: fixed;
@@ -114,8 +122,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); // Semi-transparent
-  z-index: 999; // Just below the modal to sit above other content
+  background-color: rgba(0, 0, 0, 0.5); 
+  z-index: 999; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,13 +131,13 @@
 
 .closeModalButton {
   position: absolute;
-  top: 10px; 
-  right: 10px; 
-  background-color: #f00; 
+  top: 20px; 
+  right: 20px; 
+  background-color: #333; 
   color: #fff; 
   border: none;
-  border-radius: 50%;
-  width: 30px; 
+  border-radius: 10%;
+  width: 50px; 
   height: 30px; 
   cursor: pointer;
   display: flex;
@@ -141,6 +149,12 @@
   }
 }
 
+.encodedText,
+.sourcePic,
+.decodedText,
+.encodedPic {
+  color: #ffffff;
+}
 
 .showPrivateKeyContainer {
   position: relative;
@@ -239,10 +253,10 @@
 }
 
 .formContainer {
-  background-image: url('img/background.jpg'); /* 指向图片的路径 */
-  background-size: cover; /* 背景图片覆盖整个容器 */
-  background-repeat: no-repeat; /* 不重复背景图片 */
-  background-position: center center; /* 背景图片居中显示 */
+  background-image: url('img/background.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top center;
   // background-color: #CCEACB;
   height: 100vh;
   display: flex;
@@ -251,7 +265,7 @@
 
   .formWrapper {
     background-color: #ffffff;
-    padding: 20px 60px;
+    padding: 40px 60px;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -261,11 +275,11 @@
     .logo {
       color:  #4B8F8C;
       font-weight: bold;
-      font-size: 24px;
+      font-size: 12px;
     }
 
     .title {
-      color:  #4B8F8C;
+      color:  #333;
       font-size: 20px;
       font-weight: bold;
     }
@@ -286,7 +300,7 @@
       }
 
       button {
-        background-color: #59A96A;
+        background-color: #488C7A;
         color: white;
         padding: 10px;
         font-weight: bold;
@@ -295,7 +309,7 @@
         transition: background-color 0.3s ease;
 
         &:hover {
-          background-color: #6289d6;
+          background-color: #488C7A;
         }
       }
     }
@@ -358,21 +372,22 @@
 
 .home {
   // background-color: #E1F2E8;
-  background-image: url('img/backgroundHome.jpg'); /* 指向图片的路径 */
-  background-size: cover; /* 背景图片覆盖整个容器 */
-  background-repeat: no-repeat; /* 不重复背景图片 */
-  background-position: center center; /* 背景图片居中显示 */
+  background-image: url('img/backgroundHome.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top center;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 
   .container {
-    border: 1px solid white;
-    border-radius: 10px;
-    width: 70%;
-    height: 80%;
+    border: 0px solid white;
+    border-radius: 20px;
+    width: 94%;
+    height: 87%;
     display: flex;
+    box-shadow: rgba(25, 101, 58, 0.35) 0px 5px 15px;
     overflow: hidden;
     @include tablet {
       width: 90%;
@@ -380,17 +395,22 @@
 
     .sidebar {
       flex: 2;
-      background-color: #407D75;
+      background-color: $white;
       position: relative;
+      overflow: scroll;
+      overflow-x: hidden;
 
       .navbar {
         display: flex;
         align-items: center;
-        background-color:  #356859;
-        height: 50px;
-        padding: 10px;
+        background-color:  $secondary;
+        height: 40px;
+        padding: 20px;
         justify-content: space-between;
         color: #ddddf7;
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
 
         .logo {
           font-weight: bold;
@@ -402,6 +422,7 @@
         .user {
           display: flex;
           gap: 10px;
+          
 
           img {
             background-color: #ddddf7;
@@ -425,66 +446,101 @@
         }
       }
       .search {
-        border-bottom: 1px solid gray;
-
+        
         .searchForm {
           padding: 10px;
-
+          
           input {
-            background-color: transparent;
-            border: none;
-            color: white;
+            box-sizing: border-box;
+            background-color: #f7f6f6;
+            border: 1px solid #FAF9F9;
+            color: #333; // Using a darker text color for better contrast
             outline: none;
-
+            width: 100%;
+            padding: 15px;
+            border-radius: 9px;
             &::placeholder {
-              color: lightgray;
+              font-family: lato;
+              font-weight: 400;
+              color: #626060; // Lighter placeholder text color
+            }
+            &:active{
+              border-color: $primary; // Highlight border color on focus
+              box-shadow: 0 0 1px 1px $primary;
+            }
+            &:focus {
+              border-color: $primary; // Highlight border color on focus
+              box-shadow: 0 0 1px 1px $primary;// Adding a blue focus indicator
             }
           }
         }
       }
 
       .userChat {
+        
+        margin: 12px;
         padding: 10px;
         display: flex;
+        font-family: lato;
+        
         align-items: center;
         gap: 10px;
+        border-radius: 8px;
         color: white;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
         cursor: pointer;
+        
 
         &:hover {
-          background-color: #356859;
+          background-color: $primary;
         }
 
         img {
-          width: 50px;
-          height: 50px;
+          width: 30px;
+          height: 30px;
           border-radius: 50%;
           object-fit: cover;
         }
 
         .userChatInfo {
           span {
-            font-size: 18px;
-            font-weight: 500;
+            font-family: lato;
+            font-size: 15px;
+            font-weight: 600;
+            color: $black;
           }
           p {
             font-size: 14px;
-            color: lightgray;
+            color: $black;
+            font-family: lato;
           }
         }
       }
     }
     .chat {
+      
       flex: 3;
 
       .chatInfo {
-        height: 50px;
-        background-color: #4B8F8C;
-        display: flex;
+        height: 40px;
+        background-color: $white;
+        display:flex;
+        font-weight: 450;
+        font-size: 18px;
+        border-bottom: 1px solid #cacaca;
         align-items: center;
         justify-content: space-between;
-        padding: 10px;
-        color: lightgray;
+        padding: 20px;
+        color: #404353;
+
+        .sendDecode{
+          border: none;
+          width: 180px;
+            padding: 10px 15px;
+            color: white;
+            background-color: #488C7A;
+            cursor: pointer;
+        }
       }
 
       .chatIcons {
@@ -502,6 +558,7 @@
         padding: 10px;
         height: calc(100% - 160px);
         overflow: scroll;
+        overflow-x: hidden;
 
         .message {
           display: flex;
@@ -513,6 +570,7 @@
             flex-direction: column;
             color: gray;
             font-weight: 300;
+
 
             img {
               width: 40px;
@@ -545,7 +603,7 @@
             .messageContent {
               align-items: flex-end;
               p {
-                background-color: #A4D4AE;
+                background-color: #488C7A;
                 color: white;
                 border-radius: 10px 0px 10px 10px;
               }
@@ -555,7 +613,7 @@
       }
 
       .input {
-        height: 50px;
+        height: 39px;
         background-color: white;
         padding: 10px;
         display: flex;
@@ -570,6 +628,7 @@
           font-size: 18px;
 
           &::placeholder {
+            font-size: 14px;
             color: lightgray;
           }
         }
@@ -586,9 +645,10 @@
 
           button {
             border: none;
-            padding: 10px 15px;
+            padding: 10px 5px;
+            width: 110px;
             color: white;
-            background-color: #7DAF9C;
+            background-color: #488C7A;
             cursor: pointer;
           }
         }
@@ -614,7 +674,9 @@
 button {
   width: calc(100% - 20px);
   padding: 10px;
-  background-color: #ff5a5f;
+  font-family: lato;
+  font-weight: 600;
+  background-color: #262626;
   border: none;
   border-radius: 4px;
   color: white;
@@ -623,7 +685,7 @@ button {
 }
 
 button:hover {
-  background-color: #e53935;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
 .recovery-password {
@@ -696,16 +758,16 @@ button:hover {
   }
 }
 
-/* 登录界面样式结束 */
+
 .social-login {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px; // 调整这个值来控制间距
+  gap: 10px; 
 }
 .social-buttons {
   display: flex;
-  gap: 10px; // 按钮之间的间隙
+  gap: 10px; 
 }
 
 .social-button {
@@ -719,23 +781,92 @@ button:hover {
   outline: none;
 
   .social-icon {
-    width: 24px; // 控制图标的宽度
-    height: auto; // 自动调整高度以保持比例
+    width: 24px; 
+    height: auto; 
   }
 }
 
-
-//个人信息
 .userInfoModal {
-  position: absolute; 
-  top: 0; 
-  left: 0; 
-  width: 100%; 
-  height: 100%; 
-  background-color: white; 
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #262626; // Increase opacity for better visibility
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 10; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .userInfoContent {
+    font-family: lato;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 40px;
+    margin: 10px; // Increase padding for better readability
+    text-align: center; // Center align text
+    
+    p{
+      padding: 5px;
+    }
+    button{
+      margin-top: 10px;
+    }
   
+  }
+
+  .userInfoActions {
+    display: flex;
+    justify-content: center; // Center align buttons
+    gap: 20px; // Increase gap between buttons for better spacing
+    padding: 20px;
+    border-top: 1px solid #ccc;
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px; // Add gap between icon and text
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        background-color: #eee;
+      }
+    }
+
+    .logoutButton {
+      background-color: #ff5a5f;
+      color: white;
+
+      svg {
+        fill: white;
+      }
+
+      &:hover {
+        background-color: #e53935;
+      }
+    }
+
+    .closeButton {
+      background-color: #4285f4;
+      color: white;
+
+      svg {
+        fill: white;
+      }
+
+      &:hover {
+        background-color: #2c62a9;
+      }
+    }
+  }
 }
 
 
@@ -748,4 +879,55 @@ button:hover {
   animation: fadeIn 0.3s ease-in-out;
 }
 
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+}
+
+.user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 10px; /* Spacing */
+}
+
+.timestamp{
+  padding-top: 5px;
+  position: relative;
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
+}
+.expiry {
+  background-color: rgba(255, 0, 0, 0.659);
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 8px;
+  padding-left: 8px;
+  border-radius: 10px;
+  animation: blinker 1s linear infinite;
+  position: relative;
+  font-size: 10px;
+  color: white;
+}
+@keyframes blinker {
+  40% {
+    opacity: 60%;
+  }
+}

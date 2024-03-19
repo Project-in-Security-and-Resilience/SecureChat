@@ -1,3 +1,30 @@
+/**
+ **  GenUniAcc:
+ * GenUniAcc is designed to ensure the existence of a unique GPT account within the application's 
+ * Firestore database. It first checks if an account with a predefined email (associated with GPT) exists. 
+ * If the account does not exist, the function proceeds to create it, along with authentication credentials,
+ *  user profile information, and encryption keys for secure communication.
+ * 
+ **  Dependencies:
+ * - Firebase Firestore (db): For querying and storing user data.
+ * - Firebase Authentication (auth): For creating the user account with email and password.
+ * - gptAccountInfos: An object containing predefined information about the GPT account, including email, password, displayName, and photoURL.
+ * - generateKeyPair function from AuthContext: For generating RSA encryption keys for the new GPT account.
+ * 
+ ** Process Flow:
+ * 1. Queries Firestore to check for the existence of the GPT account by its email.
+ * 2. If the account does not exist (res.size === 0), it executes the account creation process:
+ *    a. Creates a new user in Firebase Authentication using the predefined email and password.
+ *    b. Updates the new user's profile with the predefined displayName and photoURL.
+ *    c. Stores the user's information, including uid, displayName, email, and photoURL, in
+ *     Firestore under the "users" collection.
+ *    d. Generates a new RSA key pair for the account, storing the public key in Firestore
+ *  and the private key in local storage.
+ *    e. Initializes an empty document in the "userChats" collection for managing user chats.
+ *  3. If the account already exists, performs no action.
+ */
+
+ //imports used
 import {db, auth} from "./MyFirebase.js";
 import {collection, doc, setDoc, query, where, getDocs} from "firebase/firestore";
 import {createUserWithEmailAndPassword, updateProfile} from "firebase/auth";

@@ -1,9 +1,51 @@
+/**
+ ** Login Component:
+ *  The Login component provides a user interface for signing into the application using email
+ *  and password authentication managed by Firebase Auth. It supports additional login methods 
+ * including social login options (Google, Facebook) and a mechanism for users to provide a private
+ *  key when logging in from a new device.
+ * 
+ ** Structure:
+ * - The component renders a form for email and password input, buttons for social login options, 
+ *  and optionally, an input for the user's private key if it is not found in the local storage.
+ * - Error messages are displayed if authentication fails or if there is an issue with the private 
+ *  key login process.
+ * 
+ ** Features:
+ * - Email and password authentication with Firebase Auth.
+ * - Display and handling of authentication errors.
+ * - Private key input for users logging in from a new device, 
+ * enhancing security by requiring decryption keys to be manually entered.
+ * - Social login options with placeholder buttons for Google and Facebook authentication.
+ * - Navigation to the home page upon successful login or to the registration page for new users.
+ * 
+ **  Dependencies:
+ * - React and useState hook for component state management.
+ * - useNavigate hook from React Router Dom for programmatic navigation.
+ * - signInWithEmailAndPassword function from Firebase Auth for email/password authentication.
+ * - auth object from Firebase configuration for current user state and authentication.
+ * 
+ **  State:
+ * - err: Boolean state to indicate whether an authentication error occurred.
+ * - privateKey: State for storing the user's private key input.
+ * - showPrivateKeyInput: Boolean state to control the display of the private key input field.
+ * 
+ **  Event Handlers:
+ * - handleSubmit: Handles the form submission for email/password authentication.
+ * - handlePrivateKeyInputChange: Manages state updates for the private key input.
+ * - handleLoginWithPrivateKey: Triggers login logic that involves the user's private key.
+ * 
+ */
+
+
+// import necessary components
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import googleIcon from '../img/google.png'; // 导入 Google 图标
 import facebookIcon from '../img/facebook.png'; // 导入 Facebook 图标
 import { auth } from "../firebase";
+import SVGComponent from '../components/SVGComponent';
 
 const Login = () => {
   const [err, setErr] = useState(false);
@@ -11,6 +53,8 @@ const Login = () => {
   const [showPrivateKeyInput, setShowPrivateKeyInput] = useState(false);
   const navigate = useNavigate();
 
+
+  // Function to handle form submission for email/password login
   const handleSubmit = async (e) => {
     e.preventDefault();
     const email = e.target[0].value;
@@ -30,10 +74,12 @@ const Login = () => {
     }
   };
 
+   // Updates state based on changes to the private key input field
   const handlePrivateKeyInputChange = (e) => {
     setPrivateKey(e.target.value);
   };
 
+  // Function for handling login when a private key is required
   const handleLoginWithPrivateKey = async () => {
     try {
       // Perform login with private key logic here
@@ -52,11 +98,11 @@ const Login = () => {
   return (
     <div className="formContainer">
       <div className="formWrapper">
-        <span className="logo">Love Chat</span>
+        <span className="logo"><SVGComponent color="green"/></span>
         <span className="title">Login</span>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <input type="email" name="email" placeholder="Enter email" required />
+            <input type="email" name="email" placeholder="Email" required />
           </div>
           <div className="input-group">
             <input type="password" name="password" placeholder="Password" required />
@@ -71,19 +117,9 @@ const Login = () => {
             <button className="privateKeyInput" onClick={handleLoginWithPrivateKey}>Login with Private Key</button>
           </div>
         )}
-        <div className="social-login">
-          <p className="social-login-text">Or continue with</p>
-          <div className="social-buttons">
-            <button className="social-button google" onClick={() => {/* Google 登录逻辑 */}}>
-              <img src={googleIcon} alt="Google" className="social-icon" />
-            </button>
-            <button className="social-button facebook" onClick={() => {/* Facebook 登录逻辑 */}}>
-              <img src={facebookIcon} alt="Facebook" className="social-icon" />
-            </button>
-          </div>
-        </div>
+{/* Link to the registration page for new users */}
         <div className="register">
-          <p>Not a member? <Link to="/register">Register now</Link></p>
+          <p>Not a member? <Link style={{color:"green"}} to="/register">Register now</Link></p>
         </div>
       </div>
     </div>
