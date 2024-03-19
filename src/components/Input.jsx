@@ -95,7 +95,7 @@ async function encryptWithPublicKey(publicKeyString, message) {
 const Input = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
-  const [pdf, setPdf] = useState(null); // 新增状态用于存储 PDF 文件
+  const [pdf, setPdf] = useState(null);
   const [timeSend, setTimeSend] = useState(false); // Toggle state for time-send
   const [buttonColor, setButtonColor] = useState("#cccccc");
 
@@ -223,7 +223,6 @@ const Input = () => {
       }
     }
     if (pdf) {
-      // 处理 PDF 文件上传的逻辑...
       const storageRef = ref(storage, uuid());
       const uploadTask = uploadBytesResumable(storageRef, pdf);
 
