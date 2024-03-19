@@ -35,7 +35,7 @@
 // import neccessary components
 import React, { useState } from "react";
 import Add from "../img/addAvatar.png";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from "firebase/auth";
 import { auth, db, storage } from "../firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
@@ -82,6 +82,15 @@ const Register = () => {
     try {
       //Create user
       const res = await createUserWithEmailAndPassword(auth, email, password);
+
+       // Send verification email
+      await sendEmailVerification(res.user)
+      .then(() => {
+        alert("Verification email sent. Please check your inbox.");
+      })
+      .catch((error) => {
+        console.error("Error sending email verification", error);
+      });
 
       //Create a unique image name
       const date = new Date().getTime();
