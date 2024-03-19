@@ -107,7 +107,8 @@ const Login = () => {
       }
     }
   };
-  
+
+
 
   return (
     <div className="formContainer">
@@ -122,7 +123,7 @@ const Login = () => {
             <input type="password" name="password" placeholder="Password" required/>
           </div>
           <button type="submit">Sign In</button>
-          <button type="button" onClick={handlePasswordReset}>Forgot Password?</button>
+          {/*<button type="button" onClick={handlePasswordReset}>Forgot Password?</button>*/}
           {err && <span>Something went wrong</span>}
         </form>
         {showPrivateKeyInput && (
@@ -134,7 +135,8 @@ const Login = () => {
         )}
 {/* Link to the registration page for new users */}
         <div className="register">
-          <p>Not a member? <Link style={{color:"green"}} to="/register">Register now</Link></p>
+          <a href="#" onClick={handlePasswordReset} style={{color: 'green', cursor: 'pointer' , fontSize: '14px'}}>Forgot Password?</a>
+          <p>Not a member? <Link style={{color: "green"}} to="/register">Register now</Link></p>
         </div>
       </div>
     </div>
