@@ -404,7 +404,7 @@ $white: #ffffff;
         display: flex;
         align-items: center;
         background-color:  $secondary;
-        height: 50px;
+        height: 40px;
         padding: 20px;
         justify-content: space-between;
         color: #ddddf7;
@@ -612,7 +612,7 @@ $white: #ffffff;
       }
 
       .input {
-        height: 40px;
+        height: 39px;
         background-color: white;
         padding: 10px;
         display: flex;
@@ -644,7 +644,8 @@ $white: #ffffff;
 
           button {
             border: none;
-            padding: 10px 15px;
+            padding: 10px 5px;
+            width: 110px;
             color: white;
             background-color: #488C7A;
             cursor: pointer;

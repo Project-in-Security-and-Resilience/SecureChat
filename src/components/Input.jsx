@@ -95,11 +95,16 @@ async function encryptWithPublicKey(publicKeyString, message) {
 const Input = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
+  const [timeSend, setTimeSend] = useState(false); // Toggle state for time-send
+  const [buttonColor, setButtonColor] = useState("#cccccc");
 
   const { currentUser } = useContext(AuthContext);
   const { data } = useContext(ChatContext);
 
   const handleSend = async () => {
+    // Set disappear to true for time-send messages
+    const disappear = timeSend ? true : false;
+
     if (text.includes("<script>")) {
       alert("Your message has been blocked to protect from XSS attacks.");
       return;
@@ -154,6 +159,7 @@ const Input = () => {
           messages: arrayUnion({
             id: uuid(),
             encryptedText,
+            disappear,
             senderId: currentUser.uid,
             date: Timestamp.now(),
             img: downloadURL,
@@ -168,6 +174,7 @@ const Input = () => {
         messages: arrayUnion({
           id: uuid(),
           encryptedText,
+          disappear,
           senderId: currentUser.uid,
           date: Timestamp.now(),
         }),
@@ -207,16 +214,18 @@ const Input = () => {
           messages: arrayUnion({
             id: uuid(),
             encryptedText: gptEncryptedText,
+            disappear,
             senderId: gptInfo.uid,
             date: Timestamp.now(),
           }),
         });
       }
     }
-
+    if (!disappear) {
     await updateDoc(doc(db, "userChats", currentUser.uid), {
       [data.chatId + ".lastMessage"]: {
         encryptedText,
+        disappear,
       },
       [data.chatId + ".date"]: serverTimestamp(),
     });
@@ -224,14 +233,25 @@ const Input = () => {
     await updateDoc(doc(db, "userChats", data.user.uid), {
       [data.chatId + ".lastMessage"]: {
         encryptedText,
+        disappear,
       },
       [data.chatId + ".date"]: serverTimestamp(),
     });
-
+  }
     // Reset text and img state
     setText("");
     setImg(null);
   };
+
+  const toggleTimeSend = () => {
+    setTimeSend(prevTimeSend => !prevTimeSend);
+    if (!timeSend) {
+      setButtonColor("#FF0000"); // Gray color when timeSend is enabled
+    } else {
+      setButtonColor("#488C7A"); // Green color when timeSend is disabled
+    }
+  };
+
   return (
     <div className="input">
       <input
@@ -250,6 +270,9 @@ const Input = () => {
         <label htmlFor="file">
           <img src={Img} alt="" />
         </label>
+        <button onClick={toggleTimeSend} style={{ backgroundColor: buttonColor }}>
+          {timeSend ? 'Disable Expiry' : 'Enable Expiry'}
+        </button>
         <button onClick={handleSend}>Send</button>
       </div>
     </div>
