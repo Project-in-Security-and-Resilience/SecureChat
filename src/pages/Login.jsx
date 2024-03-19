@@ -41,7 +41,7 @@
 // import necessary components
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword , sendPasswordResetEmail } from "firebase/auth";
 import googleIcon from '../img/google.png'; // 导入 Google 图标
 import facebookIcon from '../img/facebook.png'; // 导入 Facebook 图标
 import { auth } from "../firebase";
@@ -93,6 +93,20 @@ const Login = () => {
       setErr(true);
     }
   };
+
+  // Function for Reset Password
+  const handlePasswordReset = async () => {
+    const email = prompt("Please enter your email address:");
+    if (email) {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Password reset email sent. Please check your inbox.");
+      } catch (error) {
+        console.error("Error sending password reset email:", error);
+        alert("Failed to send password reset email. Please try again.");
+      }
+    }
+  };
   
 
   return (
@@ -102,16 +116,17 @@ const Login = () => {
         <span className="title">Login</span>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <input type="email" name="email" placeholder="Email" required />
+            <input type="email" name="email" placeholder="Email" required/>
           </div>
           <div className="input-group">
-            <input type="password" name="password" placeholder="Password" required />
+            <input type="password" name="password" placeholder="Password" required/>
           </div>
           <button type="submit">Sign In</button>
+          <button type="button" onClick={handlePasswordReset}>Forgot Password?</button>
           {err && <span>Something went wrong</span>}
         </form>
         {showPrivateKeyInput && (
-          <div className="formWrapper">
+            <div className="formWrapper">
             <p>No private key found. Please enter your private key from your old device:</p>
             <input type="text" value={privateKey} onChange={handlePrivateKeyInputChange} />
             <button className="privateKeyInput" onClick={handleLoginWithPrivateKey}>Login with Private Key</button>
