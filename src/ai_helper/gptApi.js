@@ -1,5 +1,5 @@
 const gptApi = {
-    apiKey: "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"
+    apiKey: import.meta.env.VITE_GPTapiKey
 };
 
 export default gptApi;

@@ -11,7 +11,7 @@ import { getFirestore } from "firebase/firestore";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDBPSw7FyyVi-LDKexYIR8b1J51sh9Y0hs",
+  apiKey: import.meta.env.VITE_FirebaseAPIKEY,
   authDomain: "chatapp-4d7ad.firebaseapp.com",
   projectId: "chatapp-4d7ad",
   storageBucket: "chatapp-4d7ad.appspot.com",
