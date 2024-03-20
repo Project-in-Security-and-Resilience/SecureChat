@@ -104,6 +104,159 @@ const Input = () => {
 
   const handleSend = async () => {
     // Set disappear to true for time-send messages
+    // const disappear = timeSend ? true : false;
+    //
+    // if (text.includes("<script>")) {
+    //   alert("Your message has been blocked to protect from XSS attacks.");
+    //   return;
+    // }
+    //
+    // const sanitizedText = DOMPurify.sanitize(text);
+    //
+    // if (!sanitizedText.trim() && !img && !pdf) { // Ensure that either text, img, or pdf is present
+    //   alert("Please enter a message or select a file.");
+    //   return;
+    // }
+    //
+    // let encryptedText = null;
+    //
+    // if (data.user?.uid && sanitizedText) {
+    //   const recipientDoc = await getDoc(doc(db, "users", data.user.uid));
+    //   const recipientPublicKey = recipientDoc.data()?.publicKey;
+    //
+    //   encryptedText = await encryptWithPublicKey(
+    //       recipientPublicKey,
+    //       sanitizedText
+    //   );
+    //
+    //   const senderDoc = await getDoc(doc(db, "users", currentUser.uid));
+    //   const senderPublicKey = senderDoc.data()?.publicKey;
+    //
+    //   const encryptedForSender = await encryptWithPublicKey(
+    //       senderPublicKey,
+    //       sanitizedText
+    //   );
+    //
+    //   encryptedText = { recipient: encryptedText, sender: encryptedForSender };
+    // }
+    //
+    // if (pdf) {
+    //   const storageRef = ref(storage, uuid());
+    //   const uploadTask = uploadBytesResumable(storageRef, pdf);
+    //
+    //   try {
+    //     const snapshot = await new Promise((resolve, reject) => {
+    //       uploadTask.on(
+    //           "state_changed",
+    //           (snapshot) => {},
+    //           (error) => reject(error),
+    //           () => resolve(uploadTask.snapshot)
+    //       );
+    //     });
+    //
+    //     const downloadURL = await getDownloadURL(snapshot.ref);
+    //
+    //     await updateDoc(doc(db, "chats", data.chatId), {
+    //       messages: arrayUnion({
+    //         id: uuid(),
+    //         encryptedText,
+    //         disappear,
+    //         senderId: currentUser.uid,
+    //         date: Timestamp.now(),
+    //         pdf: downloadURL,
+    //       }),
+    //     });
+    //   } catch (error) {
+    //     console.error("Error uploading PDF:", error);
+    //   }
+    // }
+    //
+    // if (img) {
+    //   const storageRef = ref(storage, uuid());
+    //
+    //   const uploadTask = uploadBytesResumable(storageRef, img);
+    //
+    //   try {
+    //     const snapshot = await new Promise((resolve, reject) => {
+    //       uploadTask.on(
+    //           "state_changed",
+    //           (snapshot) => {},
+    //           (error) => reject(error),
+    //           () => resolve(uploadTask.snapshot)
+    //       );
+    //     });
+    //
+    //     const downloadURL = await getDownloadURL(snapshot.ref);
+    //
+    //     await updateDoc(doc(db, "chats", data.chatId), {
+    //       messages: arrayUnion({
+    //         id: uuid(),
+    //         encryptedText,
+    //         disappear,
+    //         senderId: currentUser.uid,
+    //         date: Timestamp.now(),
+    //         img: downloadURL,
+    //       }),
+    //     });
+    //   } catch (error) {
+    //     console.error("Error uploading image:", error);
+    //     // Handle error
+    //   }
+    // }
+    //
+    // else {
+    //   await updateDoc(doc(db, "chats", data.chatId), {
+    //     messages: arrayUnion({
+    //       id: uuid(),
+    //       encryptedText,
+    //       disappear,
+    //       senderId: currentUser.uid,
+    //       date: Timestamp.now(),
+    //     }),
+    //   });
+    //
+    //   const gptInfo = await GptAccInfo();
+    //
+    //   if (data.user.uid === gptInfo.uid && img === null) {
+    //     const privateKey = fetchPrivateKey(currentUser.uid);
+    //     const decryptedMessage = await decryptWithPrivateKey(
+    //         privateKey,
+    //         encryptedText.sender
+    //     );
+    //     const combinedId =
+    //         currentUser.uid > gptInfo.uid
+    //             ? gptInfo.uid + currentUser.uid
+    //             : currentUser.uid + gptInfo.uid;
+    //     const reply = await getAIResp(decryptedMessage);
+    //
+    //     const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
+    //     const gptPublicKey = gptDoc.data()?.publicKey;
+    //     const encryptedForSender = await encryptWithPublicKey(
+    //         gptPublicKey,
+    //         reply
+    //     );
+    //     const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+    //     const userPublicKey = userDoc.data()?.publicKey;
+    //     const encryptedForReceiver = await encryptWithPublicKey(
+    //         userPublicKey,
+    //         reply
+    //     );
+    //     const gptEncryptedText = {
+    //       recipient: encryptedForReceiver,
+    //       sender: encryptedForSender,
+    //     };
+    //     await updateDoc(doc(db, "chats", data.chatId), {
+    //       messages: arrayUnion({
+    //         id: uuid(),
+    //         encryptedText: gptEncryptedText,
+    //         disappear,
+    //         senderId: gptInfo.uid,
+    //         date: Timestamp.now(),
+    //       }),
+    //     });
+    //   }
+    // }
+    // Set disappear to true for time-send messages
     const disappear = timeSend ? true : false;
 
     if (text.includes("<script>")) {
@@ -113,115 +266,36 @@ const Input = () => {
 
     const sanitizedText = DOMPurify.sanitize(text);
 
-    if (!sanitizedText.trim() && !img) {
-      alert("Please enter a message.");
+    // Check if either text or img/pdf is present
+    if (!sanitizedText.trim() && !img && !pdf) {
+      alert("Please enter a message or select a file.");
       return;
     }
+
     let encryptedText = null;
 
+    // Encrypt text message if available
     if (data.user?.uid && sanitizedText) {
       const recipientDoc = await getDoc(doc(db, "users", data.user.uid));
       const recipientPublicKey = recipientDoc.data()?.publicKey;
 
       encryptedText = await encryptWithPublicKey(
-        recipientPublicKey,
-        sanitizedText
+          recipientPublicKey,
+          sanitizedText
       );
 
       const senderDoc = await getDoc(doc(db, "users", currentUser.uid));
       const senderPublicKey = senderDoc.data()?.publicKey;
 
       const encryptedForSender = await encryptWithPublicKey(
-        senderPublicKey,
-        sanitizedText
+          senderPublicKey,
+          sanitizedText
       );
 
       encryptedText = { recipient: encryptedText, sender: encryptedForSender };
     }
 
-    if (img) {
-      const storageRef = ref(storage, uuid());
-
-      const uploadTask = uploadBytesResumable(storageRef, img);
-
-      try {
-        const snapshot = await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            (snapshot) => {},
-            (error) => reject(error),
-            () => resolve(uploadTask.snapshot)
-          );
-        });
-
-        const downloadURL = await getDownloadURL(snapshot.ref);
-
-        await updateDoc(doc(db, "chats", data.chatId), {
-          messages: arrayUnion({
-            id: uuid(),
-            encryptedText,
-            disappear,
-            senderId: currentUser.uid,
-            date: Timestamp.now(),
-            img: downloadURL,
-          }),
-        });
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        // Handle error
-      }
-    } else {
-      await updateDoc(doc(db, "chats", data.chatId), {
-        messages: arrayUnion({
-          id: uuid(),
-          encryptedText,
-          disappear,
-          senderId: currentUser.uid,
-          date: Timestamp.now(),
-        }),
-      });
-
-      const gptInfo = await GptAccInfo();
-
-      if (data.user.uid === gptInfo.uid && img === null) {
-        const privateKey = fetchPrivateKey(currentUser.uid);
-        const decryptedMessage = await decryptWithPrivateKey(
-          privateKey,
-          encryptedText.sender
-        );
-        const combinedId =
-          currentUser.uid > gptInfo.uid
-            ? gptInfo.uid + currentUser.uid
-            : currentUser.uid + gptInfo.uid;
-        const reply = await getAIResp(decryptedMessage);
-
-        const gptDoc = await getDoc(doc(db, "users", gptInfo.uid));
-        const gptPublicKey = gptDoc.data()?.publicKey;
-        const encryptedForSender = await encryptWithPublicKey(
-          gptPublicKey,
-          reply
-        );
-        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-        const userPublicKey = userDoc.data()?.publicKey;
-        const encryptedForReceiver = await encryptWithPublicKey(
-          userPublicKey,
-          reply
-        );
-        const gptEncryptedText = {
-          recipient: encryptedForReceiver,
-          sender: encryptedForSender,
-        };
-        await updateDoc(doc(db, "chats", data.chatId), {
-          messages: arrayUnion({
-            id: uuid(),
-            encryptedText: gptEncryptedText,
-            disappear,
-            senderId: gptInfo.uid,
-            date: Timestamp.now(),
-          }),
-        });
-      }
-    }
+    // Upload PDF if available
     if (pdf) {
       const storageRef = ref(storage, uuid());
       const uploadTask = uploadBytesResumable(storageRef, pdf);
@@ -238,7 +312,7 @@ const Input = () => {
 
         const downloadURL = await getDownloadURL(snapshot.ref);
 
-        // 更新 Firestore 文档以包含上传的 PDF 文件信息
+        // Update Firestore document to include uploaded PDF file information
         await updateDoc(doc(db, "chats", data.chatId), {
           messages: arrayUnion({
             id: uuid(),
@@ -246,7 +320,7 @@ const Input = () => {
             disappear,
             senderId: currentUser.uid,
             date: Timestamp.now(),
-            pdf: downloadURL, // 添加 PDF 文件的下载链接
+            pdf: downloadURL, // Add PDF file download link
           }),
         });
       } catch (error) {
@@ -254,24 +328,79 @@ const Input = () => {
       }
     }
 
-    if (!disappear) {
-    await updateDoc(doc(db, "userChats", currentUser.uid), {
-      [data.chatId + ".lastMessage"]: {
-        encryptedText,
-        disappear,
-      },
-      [data.chatId + ".date"]: serverTimestamp(),
-    });
+    // Upload image if available
+    if (img) {
+      const storageRef = ref(storage, uuid());
+      const uploadTask = uploadBytesResumable(storageRef, img);
 
-    await updateDoc(doc(db, "userChats", data.user.uid), {
-      [data.chatId + ".lastMessage"]: {
-        encryptedText,
-        disappear,
-      },
-      [data.chatId + ".date"]: serverTimestamp(),
-    });
-  }
-    // Reset text and img state
+      try {
+        const snapshot = await new Promise((resolve, reject) => {
+          uploadTask.on(
+              "state_changed",
+              (snapshot) => {},
+              (error) => reject(error),
+              () => resolve(uploadTask.snapshot)
+          );
+        });
+
+        const downloadURL = await getDownloadURL(snapshot.ref);
+
+        // Update Firestore document to include uploaded image file information
+        await updateDoc(doc(db, "chats", data.chatId), {
+          messages: arrayUnion({
+            id: uuid(),
+            encryptedText,
+            disappear,
+            senderId: currentUser.uid,
+            date: Timestamp.now(),
+            img: downloadURL,
+          }),
+        });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+
+    // Upload only text message if no file selected
+    if (!pdf && !img) {
+      await updateDoc(doc(db, "chats", data.chatId), {
+        messages: arrayUnion({
+          id: uuid(),
+          encryptedText,
+          disappear,
+          senderId: currentUser.uid,
+          date: Timestamp.now(),
+        }),
+      });
+
+      // Perform additional actions if applicable
+      // For example, interacting with AI assistant
+      // This logic should be handled separately based on your requirements
+    }
+
+    // Reset text and file states
+    setText("");
+    setImg(null);
+    setPdf(null);
+    if (!disappear) {
+      await updateDoc(doc(db, "userChats", currentUser.uid), {
+        [data.chatId + ".lastMessage"]: {
+          encryptedText,
+          disappear,
+        },
+        [data.chatId + ".date"]: serverTimestamp(),
+      });
+
+      await updateDoc(doc(db, "userChats", data.user.uid), {
+        [data.chatId + ".lastMessage"]: {
+          encryptedText,
+          disappear,
+        },
+        [data.chatId + ".date"]: serverTimestamp(),
+      });
+    }
+
+    // Reset text, img, and pdf states
     setText("");
     setImg(null);
     setPdf(null);
@@ -287,40 +416,41 @@ const Input = () => {
   };
 
   return (
-    <div className="input">
-      <input
-        type="text"
-        placeholder="Type something..."
-        onChange={(e) => setText(e.target.value)}
-        value={text}
-      />
-      <div className="send">
+      <div className="input">
         <input
-            type="file"
-            style={{display: "none"}}
-            id="file"
-            onChange={(e) => setImg(e.target.files[0])}
+            type="text"
+            placeholder="Type something..."
+            onChange={(e) => setText(e.target.value)}
+            value={text}
         />
-        <label htmlFor="file">
-          <img src={Img} alt=""/>
-        </label>
-        <input
-            type="file"
-            style={{display: "none"}}
-            id="file"
-            accept=".pdf" // PDF file limitation
-            onChange={(e) => setPdf(e.target.files[0])} // update PDF file state
-        />
-        <label htmlFor="file">
-          <img src={Attach} alt=""/> {/* Use a new icon to indicate uploading a PDF */}
-        </label>
-
-        <button onClick={toggleTimeSend} style={{backgroundColor: buttonColor}}>
-          {timeSend ? 'Disable Expiry' : 'Enable Expiry'}
-        </button>
-        <button onClick={handleSend}>Send</button>
+        <div className="send">
+          <input
+              type="file"
+              style={{display: "none"}}
+              id="file"
+              accept=".pdf,.doc,.docx" // PDF file limitation
+              onChange={(e) => setPdf(e.target.files[0])} // update PDF file state
+          />
+          <label htmlFor="file">
+            <img src={Attach} alt=""/>{" "}
+            {/* Use a new icon to indicate uploading a PDF */}
+          </label>
+          <input
+              type="file"
+              style={{display: "none"}}
+              id="imgFile"
+              accept="image/*" // 接受所有图片格式
+              onChange={(e) => setImg(e.target.files[0])}
+          />
+          <label htmlFor="imgFile">
+            <img src={Img} alt=""/> {/* 图片文件上传图标 */}
+          </label>
+          <button onClick={toggleTimeSend} style={{backgroundColor: buttonColor}}>
+            {timeSend ? 'Disable Expiry' : 'Enable Expiry'}
+          </button>
+          <button onClick={handleSend}>Send</button>
+        </div>
       </div>
-    </div>
   );
 };
 

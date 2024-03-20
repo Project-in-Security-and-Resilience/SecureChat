@@ -95,6 +95,7 @@
    const privateKey = fetchPrivateKey(currentUser.uid);
  
    useEffect(() => {
+     console.log(message);
      // Asynchronously decrypts the message when the component mounts or when the message changes
      const decryptMessage = async () => {
        try {
@@ -113,7 +114,7 @@
          } catch (error) {}
        }
      };
- 
+
      decryptMessage();
    }, [message, privateKey]);
  
@@ -158,13 +159,14 @@
              {message.img && (
                  // Wrap the image with a link
                  <a href={message.img} download="downloaded_image.jpg" target="_blank">
-                   <img src={message.img} alt="This is pdf file, Click to download" />
+                   <img src={message.img} alt="Download PDF" />
                  </a>
              )}
              {/* If a PDF file is available, a link to download the PDF is displayed */}
              {message.pdf && (
                  <a href={message.pdf} download={`${message.senderId}_document.pdf`} target="_blank">
-                   Download PDF
+                   {/*Download PDF*/}
+                   {`${message.senderId}_document.pdf`}
                  </a>
              )}
            </p>
