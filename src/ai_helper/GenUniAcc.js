@@ -25,7 +25,7 @@
  */
 
  //imports used
-import {db, auth} from "./MyFirebase.js";
+import {db, auth} from "../firebase.jsx";
 import {collection, doc, setDoc, query, where, getDocs} from "firebase/firestore";
 import {createUserWithEmailAndPassword, updateProfile} from "firebase/auth";
 import {gptAccountInfos} from "./UNIQUE_GPT_ACCOUNT.js";
@@ -36,7 +36,7 @@ const GenUniAcc = async () => {
 // Find the account, then check the account if is unique
     const q = query(collection(db, "users"), where("email", "==", gptAccountInfos.email));
     const res = await getDocs(q);
-    console.log(res.size === 0? "Creating the unique gpt account" : "No need to create gpt account")
+    // console.log(res.size === 0? "Creating the unique gpt account" : "No need to create gpt account")
 
 // not create the unique GPT account, need to create an account (the account of GPT is only one)
     if (res.size === 0) {

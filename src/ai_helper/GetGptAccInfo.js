@@ -25,7 +25,7 @@
 
 
 // imports
-import {db} from "./MyFirebase.js";
+import {db} from "../firebase.jsx";
 import {collection, query, where, getDocs} from "firebase/firestore";
 import {gptAccountInfos} from "./UNIQUE_GPT_ACCOUNT.js";
 

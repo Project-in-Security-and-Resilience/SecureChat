@@ -62,7 +62,6 @@ import { db } from "../firebase";
    try {
      // Decode the Base64-encoded encrypted message
      const encryptedMessageBuffer = Uint8Array.from(atob(encryptedMessageBase64), c => c.charCodeAt(0));
- 
      // Decode the Base64-encoded private key string
      const privateKeyBuffer = Uint8Array.from(atob(privateKeyString), c => c.charCodeAt(0));
      // Import the private key
@@ -86,6 +85,7 @@ import { db } from "../firebase";
      );
      // Convert the decrypted message buffer to a string
      const decryptedMessage = new TextDecoder().decode(decryptedMessageBuffer);
+     
      return decryptedMessage;
    } catch (error) {
      throw error;
@@ -201,7 +201,6 @@ async function verifySignature(publicKeyString, message, signature) {
             privateKey,
             message.encryptedText.recipient
           );
-          console.log(decryptedMessage)
           setDecryptedMes(decryptedMessage);
         
       }

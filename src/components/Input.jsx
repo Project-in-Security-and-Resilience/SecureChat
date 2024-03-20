@@ -55,7 +55,7 @@ import { fetchPrivateKey } from "./Message";
 import { decryptWithPrivateKey } from "./Message";
 
 
-async function encryptWithPublicKey(publicKeyString, message) {
+export async function encryptWithPublicKey(publicKeyString, message) {
   try {
     const publicKeyBuffer = Uint8Array.from(
       atob(publicKeyString),

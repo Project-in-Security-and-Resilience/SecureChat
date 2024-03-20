@@ -44,15 +44,36 @@ import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword , sendPasswordResetEmail } from "firebase/auth";
 import googleIcon from '../img/google.png'; // 导入 Google 图标
 import facebookIcon from '../img/facebook.png'; // 导入 Facebook 图标
-import { auth } from "../firebase";
+import { auth,db } from "../firebase";
 import SVGComponent from '../components/SVGComponent';
+import {
+  doc,
+  getDoc,
+} from "firebase/firestore";
+import { encryptWithPublicKey } from "../components/Input";
+import { decryptWithPrivateKey } from "../components/Message";
 
 const Login = () => {
   const [err, setErr] = useState(false);
   const [privateKey, setPrivateKey] = useState("");
   const [showPrivateKeyInput, setShowPrivateKeyInput] = useState(false);
   const navigate = useNavigate();
+  
 
+  // Function to verify if the public and private keys work together correctly
+const verifyKeys = async (publicKey, privateKey, testMessage) => {
+  try {
+    // Encrypt the test message using the user's public key
+    const encryptedMessage = await encryptWithPublicKey(publicKey, testMessage);
+    // Decrypt the encrypted message using the user's private key
+    const decryptedMessage = await decryptWithPrivateKey(privateKey, encryptedMessage);
+    // Compare decrypted message with original message
+    return decryptedMessage === testMessage;
+    
+  } catch (error) {
+    return false;
+  }
+};
 
   // Function to handle form submission for email/password login
   const handleSubmit = async (e) => {
@@ -62,14 +83,30 @@ const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+
+
+      // Retrieve user's public key from the database
+      const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid));
+      const publicKey = userDoc.data()?.publicKey;
+
+      // Encrypt the test message using the user's public key
+    const testMessage = "Your original test message"; // Provide your original test message here
+
+
       // Check if private key exists for the user
       const storedPrivateKey = localStorage.getItem(`${auth.currentUser?.uid}_privateKey`);
       if (!storedPrivateKey) {
         setShowPrivateKeyInput(true);
       } else {
-        navigate("/");
+        if(await verifyKeys(publicKey,storedPrivateKey,testMessage)){
+          navigate("/");
+        }else{
+          setShowPrivateKeyInput(true);
+          setErr(true);
+        }
       }
     } catch (err) {
+      setShowPrivateKeyInput(true);
       setErr(true);
     }
   };
@@ -82,15 +119,23 @@ const Login = () => {
   // Function for handling login when a private key is required
   const handleLoginWithPrivateKey = async () => {
     try {
-      // Perform login with private key logic here
-      console.log("Logging in with private key:", privateKey);
+      // Retrieve user's public key from the database
+      const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid));
+      const publicKey = userDoc.data()?.publicKey;
+      const testMessage = "Your original test message"; // Provide your original test message here
+
       // Store the private key locally
       localStorage.setItem(`${auth.currentUser?.uid}_privateKey`, privateKey);
+      if(await verifyKeys(publicKey,privateKey,testMessage)){
       // Example: Navigate to the next page after successful login
       navigate("/");
+      }else{
+          setShowPrivateKeyInput(true);
+          setErr(true);
+      }
     } catch (error) {
-      console.error("Error logging in with private key:", error);
-      setErr(true);
+          setShowPrivateKeyInput(true);
+          setErr(true);
     }
   };
 
@@ -102,7 +147,6 @@ const Login = () => {
         await sendPasswordResetEmail(auth, email);
         alert("Password reset email sent. Please check your inbox.");
       } catch (error) {
-        console.error("Error sending password reset email:", error);
         alert("Failed to send password reset email. Please try again.");
       }
     }
@@ -128,7 +172,7 @@ const Login = () => {
         </form>
         {showPrivateKeyInput && (
             <div className="formWrapper">
-            <p>No private key found. Please enter your private key from your old device:</p>
+            <p>Private Key was reset. Please enter your new private key from your old device:</p>
             <input type="text" value={privateKey} onChange={handlePrivateKeyInputChange} />
             <button className="privateKeyInput" onClick={handleLoginWithPrivateKey}>Login with Private Key</button>
           </div>
