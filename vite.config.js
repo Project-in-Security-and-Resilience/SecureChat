@@ -11,7 +11,7 @@ export default ({ mode }) => {
 
     server: { https: true,host: '0.0.0.0',
       port: 443 },
-    plugins: [react(),mkcert()],
+    plugins: [react()],
   });
 }
 // https://vitejs.dev/config/
