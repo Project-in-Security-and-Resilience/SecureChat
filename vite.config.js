@@ -9,8 +9,7 @@ export default ({ mode }) => {
 
   return defineConfig({
 
-    server: { https: true,host: '0.0.0.0',
-      port: 443 },
+    server: {},
     plugins: [react()],
   });
 }
