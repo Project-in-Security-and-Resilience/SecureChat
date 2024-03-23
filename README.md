@@ -4,8 +4,6 @@
 
 ##### Documentations Used:
 
-The following documentations were referenced during the development of this project:
-
 ## ⚙️ Requirements & Installation
 
 ### ⚠ Requried environment variables
@@ -45,7 +43,7 @@ Install Node.js and yarn package manager.
 1. Deploy on Localhost
 
    ```
-   Deploy on Localhost
+   yarn run dev
    ```
 2. Deploy on any server (use the command to generate build files in /dist directory)
 
