@@ -52,6 +52,7 @@ Install Node.js and yarn package manager.
    ```
 
 ## 👨‍💻 Usage
+https://youtu.be/gqsp-OPTtIk
 
 ## [🎚️](https://emojipedia.org/level-slider/)Debugging
 
