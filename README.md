@@ -2,7 +2,9 @@
 ## [🏁](https://emojipedia.org/chequered-flag/) Getting Started
 
 
-##### Documentations Used:
+##### IEEE Style Project Paper
+
+[Advancing Chat Security Asymmetric Encryption for Scalable Web Applications.pdf](https://github.com/Project-in-Security-and-Resilience/SecureChat/files/14775400/Advancing.Chat.Security.Asymmetric.Encryption.for.Scalable.Web.Applications.pdf)
 
 ## ⚙️ Requirements & Installation
 
@@ -52,6 +54,8 @@ Install Node.js and yarn package manager.
    ```
 
 ## 👨‍💻 Usage
+
+#### Demonstration Video
 https://youtu.be/gqsp-OPTtIk
 
 ## [🎚️](https://emojipedia.org/level-slider/)Debugging
