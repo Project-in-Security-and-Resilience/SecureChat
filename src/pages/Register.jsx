@@ -147,10 +147,10 @@ const Register = () => {
         <form onSubmit={handleSubmit}>
             {/* Input fields for display name, email, password, and file upload for avatar */}
           <input required type="text" placeholder="Username" name="username" />
-          <input required type="email" placeholder="Email" />
-          <input required type="password" placeholder="Password" />
+          <input required type="email" placeholder="Email" name="email" />
+          <input required type="password" placeholder="Password" name="password" />
           <input required style={{ display: "none" }} type="file" id="file"
-                 accept="image/png, image/jpeg, image/jpg" onChange={checkImg} />
+                 accept="image/png, image/jpeg, image/jpg" onChange={checkImg} name="file" />
           <label htmlFor="file">
             <img style={{width:"30px", height:"30px",cursor:"pointer"}} src={Add} alt=""/>
             <p>Add an avatar</p>
