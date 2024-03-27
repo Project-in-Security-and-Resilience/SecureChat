@@ -146,7 +146,7 @@ const Register = () => {
         <span className="title">Register</span>
         <form onSubmit={handleSubmit}>
             {/* Input fields for display name, email, password, and file upload for avatar */}
-          <input required type="text" placeholder="Username" />
+          <input required type="text" placeholder="Username" name="username" />
           <input required type="email" placeholder="Email" />
           <input required type="password" placeholder="Password" />
           <input required style={{ display: "none" }} type="file" id="file"
